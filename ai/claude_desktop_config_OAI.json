@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "Demo": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--with",
+        "mcp[cli]",
+        "mcp",
+        "run",
+        "/Users/abuxton/src/github/dojo/ai/obsidian_agent.py"
+      ]
+    }
+  }
+}
