@@ -4,25 +4,6 @@ Welcome to aoc25-day1,
 
 ## Description
 
-advent of code day 1 using rust
-
-## Getting Started
-
-Clone this repository using the following command:
-
-### Usage
-
-usage instructions
-
-## Contributing
-
-Contributions are always welcome! If you're interested in contributing, please review our [contributing guidelines](../../../CONTRIBUTING.md).
-
-## License
-
-This project is licensed under the DBAD License - see the [LICENSE.md](../../../LICENSE.md) file for details.
-
-
 --- Day 1: Secret Entrance ---
 The Elves have good news and bad news.
 
@@ -79,3 +60,98 @@ The dial is rotated R14 to point at 14.
 The dial is rotated L82 to point at 32.
 Because the dial points at 0 a total of three times during this process, the password in this example is 3.
 
+
+
+## Getting Started
+
+Clone this repository using the following command:
+
+### Usage
+
+...existing code...
+## Example usage
+
+Place your puzzle input in the crate root as `input.txt`, or pass a path as the first argument.
+
+Example `input.txt` (from the README example):
+```
+L68
+L30
+R48
+L5
+R60
+L55
+L1
+L99
+R14
+L82
+```
+
+Run with the default file:
+```bash
+cd /Users/abuxton/src/github/dojo/aoc25/day1/aoc-day1
+cargo run --release
+```
+
+Or run with an explicit file:
+```bash
+cargo run --release -- my_input.txt
+```
+
+Expected output for the example data:
+```
+3
+```
+
+Notes:
+- The binary prints a single number: the count of times the dial points at `0`.
+- Use `cargo test` to run the included unit test (`example`).
+...existing code...
+```// filepath: /Users/abuxton/src/github/dojo/aoc25/day1/aoc-day1/README.md
+...existing code...
+## Example usage
+
+Place your puzzle input in the crate root as `input.txt`, or pass a path as the first argument.
+
+Example `input.txt` (from the README example):
+```
+L68
+L30
+R48
+L5
+R60
+L55
+L1
+L99
+R14
+L82
+```
+
+Run with the default file:
+```bash
+cd /Users/abuxton/src/github/dojo/aoc25/day1/aoc-day1
+cargo run --release
+```
+
+Or run with an explicit file:
+```bash
+cargo run --release -- my_input.txt
+```
+
+Expected output for the example data:
+```
+3
+```
+
+Notes:
+- The binary prints a single number: the count of times the dial points at `0`.
+- Use `cargo test` to run the included unit test (`example`).
+...existing code...
+
+## Contributing
+
+Contributions are always welcome! If you're interested in contributing, please review our [contributing guidelines](../../../CONTRIBUTING.md).
+
+## License
+
+This project is licensed under the DBAD License - see the [LICENSE.md](../../../LICENSE.md) file for details.
