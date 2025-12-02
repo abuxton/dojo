@@ -57,7 +57,7 @@ rust-fmt: ## Format all Rust files
 
 rust-fmt-check: ## Check formatting (use in CI)
 	@echo "cargo fmt -- --check"
-	$(CARGO) fmt -- $(CARGO_FMT_FLAGS) --check
+	$(CARGO) fmt $(CARGO_FMT_FLAGS) --check
 
 rust-clippy: ## Run clippy and deny warnings
 	@echo "cargo clippy $(CARGO_CLIPPY_FLAGS)"
