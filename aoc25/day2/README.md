@@ -1,12 +1,53 @@
-# aoc25 day2
+# aoc25 Day 2 — Gift Shop
 
-Welcome to aoc25 day2, maintained by github name.
+Advent of Code 2025 — Day 2: Gift Shop.
 
-## Description
+Brief: given a single line of comma-separated ID ranges (e.g. `11-22,95-115,...`), find all IDs that are formed by repeating a sequence of digits twice (e.g. 55, 6464, 123123). Sum all such invalid IDs present in the ranges.
 
-<https://adventofcode.com/2025/day/2>
+## Input format
+- A single line containing comma-separated ranges.
+- Each range is `start-end` where start and end are inclusive non-negative integers with no leading zeros.
+- Example input file (`input.txt`):
+```
+11-22,95-115,998-1012,1188511880-1188511890,222220-222224,1698522-1698528,446443-446449,38593856-38593862,565653-565659,824824821-824824827,2121212118-2121212124
+```
 
-### --- Day 2: Gift Shop ---
+## Usage
+
+Build and run from the crate directory:
+
+```bash
+cd /Users/abuxton/src/github/dojo/aoc25/day2
+# default reads 'input.txt' in crate root
+cargo run --release
+
+# or provide an explicit input file
+cargo run --release -- my_input.txt
+```
+
+Expected output (for the README example):
+```
+part1: 1227775554
+```
+(Format may vary depending on binary; the value above is the expected sum for the example ranges.)
+
+## Implementation notes
+
+- The solution parses ranges and iterates only as much as necessary (avoid enumerating entire huge ranges when possible).
+- Validates no leading zeros and skips malformed tokens.
+- Handles 64-bit integers (use bigint if inputs exceed 64-bit).
+
+## Tests
+Run unit tests:
+
+```bash
+cargo test
+```
+
+Add example-based tests in `src` or `tests/` to verify correctness for sample ranges.
+
+
+## --- Day 2: Gift Shop ---
 
 You get inside and take the elevator to its only other stop: the gift shop. "Thank you for visiting the North Pole!" gleefully exclaims a nearby sign. You aren't sure who is even allowed to visit the North Pole, but you know you can access the lobby through here, and from there you can access the rest of the North Pole base.
 
@@ -42,18 +83,10 @@ Adding up all the invalid IDs in this example produces 1227775554.
 
 What do you get if you add up all of the invalid IDs?
 
-## Getting Started
-
-Clone this repository using the following command:
-
-## Usage
-
-usage instructions
-
 ## Contributing
-
-Contributions are always welcome! If you're interested in contributing, please review our [contributing guidelines](./CONTRIBUTING.md).
+Contributions welcome. See repository-level contributing guidelines:
+- ../../../CONTRIBUTING.md
 
 ## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+See repository-level license:
+- <../../../LICENSE.md>
