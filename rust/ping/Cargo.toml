@@ -1,0 +1,8 @@
+[package]
+name = "ping"
+version = "0.1.0"
+edition = "2024"
+source ="https://bou.ke/blog/rust-ping"
+
+[dependencies]
+socket2 = "0.6.1"
