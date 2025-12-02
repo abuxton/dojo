@@ -1,18 +1,10 @@
-# https://github.com/krisnova/Makefile/blob/main/Makefile
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
 
--include .env
+# This should be symlinked into each individual track
+# directory - not useful to run it in the 'common' directory
 
-all: help
+REPO_TOP=$(shell git rev-parse --show-toplevel)
 
-build: ## Build target does build things.
-	@echo "Building..."
+include ${REPO_TOP}/common/mk/core.mk
 
-example: ## Example target does example things.
-	@echo "Example..."
-
-sample: ## Sample target does sample things.
-	@echo "Sample..."
-
-.PHONY: help
-help:  ## Show help messages for make targets
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(firstword $(MAKEFILE_LIST)) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-30s\033[0m %s\n", $$1, $$2}'

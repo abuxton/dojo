@@ -8,9 +8,8 @@ BIN_DIR=${REPO_TOP}/common/bin
 
 all: help help-git help-rust
 
-
--include ${REPO_TOP}/common/bin/git.mk
--include ${REPO_TOP}/common/bin/rust.mk
+-include ${BIN_DIR}/git.mk
+-include ${BIN_DIR}/rust.mk
 
 
 .PHONY: help
