@@ -9,6 +9,7 @@ Advent of Code 2025 <https://adventofcode.com/2025>
 ## Getting Started
 
 this is just my scratch code for <https://adventofcode.com/2025>
+- please note this year i'm using it to learn Rust and also prompt engineering my answers <https://github.com/Ranrar/rustic-prompt?tab=readme-ov-file>
 
 ## Usage
 
