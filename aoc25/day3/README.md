@@ -1,6 +1,6 @@
 # day3
 
-Welcome Advent of Code day 3 implementation with Rust and Copilot! maintained by abuxton.
+Welcome — Advent of Code Day 3 implementation in Rust (maintained by abuxton).
 
 ## Description
 
@@ -14,38 +14,77 @@ You explain your need to get further underground. "Well, you could at least take
 
 "But, don't worry! It's not fried; it just needs power. Maybe you can get it running while I keep working on the elevators."
 
-There are batteries nearby that can supply emergency power to the escalator for just such an occasion. The batteries are each labeled with their joltage rating, a value from 1 to 9. You make a note of their joltage ratings (your puzzle input). For example:
+There are batteries nearby that can supply emergency power to the escalator for just such an occasion. The batteries are each labeled with their joltage rating, a single digit from 1..=9. The puzzle input is a multiline file where each line is a bank of batteries (a sequence of digits). From each bank you must choose exactly two batteries (keep their original order) and the bank's output joltage is the two-digit number formed by those digits (for batteries at positions i<j the value is 10*digit[i] + digit[j]). Your task is to pick the two batteries that produce the largest possible two-digit number for each bank, then sum those maxima across all banks.
 
+Example input:
+```
 987654321111111
 811111111111119
 234234234234278
 818181911112111
-The batteries are arranged into banks; each line of digits in your input corresponds to a single bank of batteries. Within each bank, you need to turn on exactly two batteries; the joltage that the bank produces is equal to the number formed by the digits on the batteries you've turned on. For example, if you have a bank like 12345 and you turn on batteries 2 and 4, the bank would produce 24 jolts. (You cannot rearrange batteries.)
+```
+Example explanation:
+- from `987654321111111` choose `9` and `8` -> 98
+- from `811111111111119` choose `8` and `9` -> 89
+- from `234234234234278` choose `7` and `8` -> 78
+- from `818181911112111` choose `9` and `2` -> 92
 
-You'll need to find the largest possible joltage each bank can produce. In the above example:
-
-In 987654321111111, you can make the largest joltage possible, 98, by turning on the first two batteries.
-In 811111111111119, you can make the largest joltage possible by turning on the batteries labeled 8 and 9, producing 89 jolts.
-In 234234234234278, you can make 78 by turning on the last two batteries (marked 7 and 8).
-In 818181911112111, the largest joltage you can produce is 92.
-The total output joltage is the sum of the maximum joltage from each bank, so in this example, the total output joltage is 98 + 89 + 78 + 92 = 357.
-
-There are many batteries in front of you. Find the maximum joltage possible from each bank; what is the total output joltage?
-
-
+Total: `98 + 89 + 78 + 92 = 357`
 
 ## Getting Started
 
-Clone this repository using the following command:
+Requirements
+- Rust toolchain (rustup + cargo)
+
+Build
+```bash
+cd /Users/abuxton/src/github/dojo/aoc25/day3
+cargo build
+```
 
 ## Usage
 
-TODO
+By convention the program reads `input.txt` from the crate root unless you pass a filename as the first argument.
+
+Run with default input:
+```bash
+cargo run --
+```
+
+Run with explicit input file:
+```bash
+cargo run -- path/to/input.txt
+```
+
+Expected output for the README example:
+```
+357
+```
+
+Behavior and assumptions
+- Lines that are empty or contain fewer than two digits contribute `0`.
+- Non-digit characters are ignored when extracting digits from a line.
+- Digits retain their original order; you may not rearrange batteries.
+
+## Tests
+
+Unit tests live in `src` and include example-based checks. Run:
+```bash
+cargo test
+```
+
+## Implementation
+
+See `src/main.rs` for the Rust implementation. The solver:
+- Parses lines, extracts digits,
+- For each line computes the largest two-digit value obtainable by taking any pair i<j,
+- Sums those maxima and prints the total.
 
 ## Contributing
 
-Contributions are always welcome! If you're interested in contributing, please review our [contributing guidelines](./CONTRIBUTING.md).
+Contributions welcome. See repository-level contributing guidelines:
+- ../../../CONTRIBUTING.md
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the MIT License — see repository `LICENSE.md`.
