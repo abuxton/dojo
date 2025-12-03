@@ -2,7 +2,9 @@ use std::error::Error;
 use std::fs;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let path = std::env::args().nth(1).unwrap_or_else(|| "input.txt".to_string());
+    let path = std::env::args()
+        .nth(1)
+        .unwrap_or_else(|| "input.txt".to_string());
     let input = fs::read_to_string(path)?;
     let total = solve(&input);
     println!("{}", total);
@@ -70,9 +72,9 @@ mod tests {
 9
 ab45
 ";
-        // lines: "12a3" -> digits 1,2,3 -> best 13
+        // lines: "12a3" -> digits 1,2,3 -> best 23 (choose 2 then 3)
         // "9" -> less than 2 digits -> 0
         // "ab45" -> digits 4,5 -> 45
-        assert_eq!(solve(input), 13 + 0 + 45);
+        assert_eq!(solve(input), 23 + 0 + 45);
     }
 }
