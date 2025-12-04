@@ -90,7 +90,8 @@ fn find_accessible_positions(grid: &[Vec<char>]) -> Vec<(usize, usize)> {
             }
         }
     }
-
+    // println!("{:?}", grid);
+	// println!("{} accessables", accessible.len());
     accessible
 }
 
@@ -114,7 +115,8 @@ fn count_neighbors(grid: &[Vec<char>], r: usize, c: usize) -> usize {
             }
         }
     }
-
+    // println!("{:?}", grid);
+	// println!("{} neighbors", count);
     count
 }
 
