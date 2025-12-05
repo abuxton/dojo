@@ -35,7 +35,7 @@ pub fn solve(input: &str) -> Result<(usize, usize), Box<dyn Error>> {
     }
 
     // Parse ranges with better error messages
-    let mut ranges: Vec<(u32, u32)> = Vec::new();
+    let mut ranges: Vec<(u64, u64)> = Vec::new();
     for (line_num, line) in sections[0].lines().enumerate() {
         let line = line.trim();
         if line.is_empty() {
@@ -52,7 +52,7 @@ pub fn solve(input: &str) -> Result<(usize, usize), Box<dyn Error>> {
             .into());
         }
 
-        let a: u32 = parts[0].trim().parse()
+        let a: u64 = parts[0].trim().parse()
             .map_err(|e| format!(
                 "Invalid number '{}' in range on line {}: {}",
                 parts[0].trim(),
@@ -60,7 +60,7 @@ pub fn solve(input: &str) -> Result<(usize, usize), Box<dyn Error>> {
                 e
             ))?;
 
-        let b: u32 = parts[1].trim().parse()
+        let b: u64 = parts[1].trim().parse()
             .map_err(|e| format!(
                 "Invalid number '{}' in range on line {}: {}",
                 parts[1].trim(),
@@ -82,7 +82,7 @@ pub fn solve(input: &str) -> Result<(usize, usize), Box<dyn Error>> {
     }
 
     // Parse queries with better error messages
-    let mut queries: Vec<u32> = Vec::new();
+    let mut queries: Vec<u64> = Vec::new();
     let query_section_start = sections[0].lines().count() + 2; // +2 for blank line
 
     for (idx, line) in sections[1].lines().enumerate() {
@@ -91,7 +91,7 @@ pub fn solve(input: &str) -> Result<(usize, usize), Box<dyn Error>> {
             continue;
         }
 
-        let q: u32 = line.parse()
+        let q: u64 = line.parse()
             .map_err(|e| format!(
                 "Invalid query number '{}' on line {}: {}",
                 line,
@@ -209,13 +209,16 @@ not-a-range
     }
 
     #[test]
-    fn handles_overflow_numbers() {
+    fn handles_large_numbers() {
         let input = "\
-99999999999999999999-100
+263168346238540-263168346238550
 
-5
+263168346238545
+999999999999999
 ";
-        assert!(solve(input).is_err());
+        let (part1, part2) = solve(input).unwrap();
+        assert_eq!(part1, 1); // 263168346238545 is in range
+        assert_eq!(part2, 1); // 999999999999999 is not in range
     }
 
     #[test]
