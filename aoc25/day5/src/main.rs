@@ -13,8 +13,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 /// Parse input and solve both parts:
-/// - Part 1: count queries NOT in any range
-/// - Part 2: count queries in ANY range
+/// - Part 1: count queries IN any range (fresh ingredients)
+/// - Part 2: count queries NOT in any range (spoiled ingredients)
 pub fn solve(input: &str) -> Result<(usize, usize), Box<dyn Error>> {
     let sections: Vec<&str> = input.split("\n\n").collect();
     if sections.len() != 2 {
@@ -41,16 +41,16 @@ pub fn solve(input: &str) -> Result<(usize, usize), Box<dyn Error>> {
         .map(|line| line.trim().parse::<u32>())
         .collect::<Result<Vec<_>, _>>()?;
 
-    // Part 1: count queries NOT in any range
+    // Part 1: count queries in ANY range (fresh)
     let part1 = queries
         .iter()
-        .filter(|&&q| !ranges.iter().any(|&(a, b)| q >= a && q <= b))
+        .filter(|&&q| ranges.iter().any(|&(a, b)| q >= a && q <= b))
         .count();
 
-    // Part 2: count queries in ANY range
+    // Part 2: count queries NOT in any range (spoiled)
     let part2 = queries
         .iter()
-        .filter(|&&q| ranges.iter().any(|&(a, b)| q >= a && q <= b))
+        .filter(|&&q| !ranges.iter().any(|&(a, b)| q >= a && q <= b))
         .count();
 
     Ok((part1, part2))
@@ -76,8 +76,8 @@ mod tests {
 32
 ";
         let (part1, part2) = solve(input).unwrap();
-        assert_eq!(part1, 2); // 1 and 32 not in any range
-        assert_eq!(part2, 4); // 5, 8, 11, 17 in ranges
+        assert_eq!(part1, 3); // 5, 11, 17 are fresh (in ranges)
+        assert_eq!(part2, 3); // 1, 8, 32 are spoiled (not in ranges)
     }
 
     #[test]
@@ -90,8 +90,8 @@ mod tests {
 7
 ";
         let (part1, part2) = solve(input).unwrap();
-        assert_eq!(part1, 0);
-        assert_eq!(part2, 3);
+        assert_eq!(part1, 3); // all fresh
+        assert_eq!(part2, 0); // none spoiled
     }
 
     #[test]
@@ -104,8 +104,8 @@ mod tests {
 30
 ";
         let (part1, part2) = solve(input).unwrap();
-        assert_eq!(part1, 3);
-        assert_eq!(part2, 0);
+        assert_eq!(part1, 0); // none fresh
+        assert_eq!(part2, 3); // all spoiled
     }
 
     #[test]
@@ -119,7 +119,7 @@ mod tests {
 20
 ";
         let (part1, part2) = solve(input).unwrap();
-        assert_eq!(part1, 1); // 20 not in range
-        assert_eq!(part2, 2); // 7, 12 in ranges
+        assert_eq!(part1, 2); // 7, 12 are fresh
+        assert_eq!(part2, 1); // 20 is spoiled
     }
 }
