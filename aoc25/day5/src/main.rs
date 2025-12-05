@@ -10,8 +10,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     match solve(&input) {
         Ok((part1, part2)) => {
-            println!("{}", part1);
-            println!("{}", part2);
+            println!("fresh {}", part1);
+            println!("Spoiled {}", part2);
             Ok(())
         }
         Err(e) => {

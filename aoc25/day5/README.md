@@ -32,7 +32,7 @@ The database operates on ingredient IDs. It consists of a list of fresh ingredie
 32
 ```
 
-The fresh ID ranges are inclusive: the range 3-5 means that ingredient IDs 3, 4, and 5 are all fresh. The ranges can also overlap; an ingredient ID is fresh if it is in any range.
+The fresh ID ranges are inclusive: the range `3-5` means that ingredient IDs 3, 4, and 5 are all fresh. The ranges can also overlap; an ingredient ID is fresh if it is in any range.
 
 The Elves are trying to determine which of the available ingredient IDs are fresh. In this example, this is done as follows:
 
@@ -80,7 +80,7 @@ cargo run --release
 Run with a custom input file:
 
 ```bash
-cargo run --release -- path/to/input.txt
+cargo run --release -- my_input.txt
 ```
 
 **Expected output** for the example above:
@@ -96,7 +96,12 @@ The first line is Part 1 (fresh ingredient IDs), the second line is Part 2 (spoi
 The input consists of two sections separated by a blank line:
 
 1. **Fresh ingredient ID ranges** (one per line, format: `a-b` where a ≤ b, inclusive)
+   - Supports large numbers up to u64::MAX (18,446,744,073,709,551,615)
+   - Ranges can overlap
+   - Empty lines are ignored
 2. **Available ingredient IDs to check** (one per line, positive integers)
+   - Also supports u64 range
+   - Empty lines are ignored
 
 Example:
 ```
@@ -116,14 +121,25 @@ Example:
 ### Algorithm
 
 **Part 1 (Fresh ingredients):**
-- For each ingredient ID, check if it falls within ANY of the fresh ranges
+- For each ingredient ID, check if it falls within ANY of the fresh ranges (inclusive)
 - Count IDs that ARE in at least one range
+- Time complexity: O(n × m) where n = queries, m = ranges
 
-**Part 2 (Spoiled ingredients):**
-- For each ingredient ID, check if it falls within ANY of the fresh ranges
-- Count IDs that are NOT in any range
 
-Both parts use simple iteration and inclusive range checking.
+
+### Error Handling
+
+The implementation provides detailed error messages for:
+- Invalid range format (not `a-b`)
+- Numbers too large for u64 (> 18,446,744,073,709,551,615)
+- Reversed ranges (where `a > b`)
+- Missing or empty query section
+- File read errors
+
+Example error output:
+```
+Error solving puzzle: Invalid number '263168346238540123456789' in range on line 1: number too large to fit in target type
+```
 
 ## Tests
 
@@ -133,19 +149,38 @@ Unit tests are included in `src/main.rs`. Run:
 cargo test
 ```
 
+Or for release builds:
+
+```bash
+cargo test --release
+```
+
 Tests cover:
 - Example from README (3 fresh, 3 spoiled)
 - All IDs fresh
 - All IDs spoiled
 - Overlapping ranges
+- Invalid range formats
+- Reversed ranges
+- Large numbers (u64 range)
+- Empty query sections
 
 ## Implementation
 
 See `src/main.rs` for the Rust implementation. The solver:
-- Parses fresh ingredient ranges from first section
-- Parses available ingredient IDs from second section
+- Parses fresh ingredient ranges from first section (with validation)
+- Parses available ingredient IDs from second section (with validation)
 - Counts IDs in any range (Part 1: fresh)
 - Counts IDs not in any range (Part 2: spoiled)
+- Uses u64 for all numbers to support very large ingredient IDs
+- Provides detailed error messages with line numbers
+
+## Performance Notes
+
+For large inputs with many ranges and queries, consider:
+- Merging overlapping ranges to reduce comparisons
+- Using interval tree or binary search for O(log m) lookups
+- Current implementation is simple and sufficient for typical AoC inputs
 
 ## Contributing
 
