@@ -73,7 +73,7 @@ impl Dsu {
     }
 }
 
-/// Solve with a configurable number of processed pairs (for examples/tests).
+/// Solve with a configurable number of processed pairs (for examples/tests and runtime parameter).
 pub fn solve_with_k(input: &str, k: usize) -> u128 {
     let pts = parse(input);
     let n = pts.len();
@@ -111,9 +111,9 @@ pub fn solve_with_k(input: &str, k: usize) -> u128 {
     a * b * c
 }
 
-/// Part 1: process the 1000 closest pairs and return product of the three largest circuits.
-pub fn solve(input: &str) -> u128 {
-    solve_with_k(input, 1000)
+/// Part 1 helper: process `k` closest pairs and return product of the three largest circuits.
+pub fn solve(input: &str, k: usize) -> u128 {
+    solve_with_k(input, k)
 }
 
 #[cfg(test)]

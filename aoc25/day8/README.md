@@ -72,12 +72,17 @@ After making the ten shortest connections, there are 11 circuits: one circuit wh
 ## Usage
 
 ```bash
-cargo run --release            # uses input.txt
-cargo run --release -- path/to/input.txt
+# Default: input.txt, process 1000 closest pairs
+cargo run --release
+
+# Custom input and custom pair count (e.g., 10 for the example)
+cargo run --release -- path/to/input.txt 10
+
+# Run tests
 cargo test --release
 ```
 
-The binary prints the Part 1 answer (product of the three largest circuit sizes after 1000 closest connections).
+The binary prints the Part 1 answer: the product of the three largest circuit sizes after processing the given number of closest connections.
 
 ## Implementation Notes
 
