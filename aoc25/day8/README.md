@@ -62,24 +62,25 @@ After making the ten shortest connections, there are 11 circuits: one circuit wh
 
 
 
+## Solution
+
+- Parse X,Y,Z coordinates per line.
+- Build all pairwise squared distances, sort ascending.
+- Process the 1000 closest pairs in order; union their endpoints (even if already connected, the pair still counts toward the 1000 processed).
+- Collect component sizes, take the three largest, and multiply.
+
 ## Usage
 
 ```bash
-# From day7 directory, using input.txt
-cargo run --release
-
-# With a different input file
+cargo run --release            # uses input.txt
 cargo run --release -- path/to/input.txt
-
-# Run tests
 cargo test --release
 ```
 
-#TODO
+The binary prints the Part 1 answer (product of the three largest circuit sizes after 1000 closest connections).
 
 ## Implementation Notes
 
-#TODO
 ## License
 
 MIT (see LICENSE).
