@@ -141,8 +141,11 @@ pub fn solve_part1(input: &str) -> Result<u64, Box<dyn Error>> {
 }
 
 /// Part 2: Parse problems right-to-left.
-/// Within each problem, read columns right-to-left.
-/// Each column provides one digit to each row's number (ones, tens, hundreds, ...).
+/// Each PROBLEM is anchored by an operator (`+` or `*`) in the bottom row.
+/// The problem spans every non-blank column adjacent to that operator (to its
+/// left and right until a fully-blank column is found).
+/// Each COLUMN (excluding the bottom operator row) forms ONE number by reading
+/// its digits top-to-bottom. Problems are evaluated right-to-left.
 pub fn solve_part2(input: &str) -> Result<u64, Box<dyn Error>> {
     let lines: Vec<&str> = input.lines().collect();
     if lines.is_empty() {
@@ -150,141 +153,94 @@ pub fn solve_part2(input: &str) -> Result<u64, Box<dyn Error>> {
     }
 
     let max_width = lines.iter().map(|l| l.len()).max().unwrap_or(0);
-    let last_line_idx = lines.len() - 1;
+    let last_row = lines.len() - 1;
 
-    // Pad all lines to same width
-    let lines: Vec<String> = lines
+    // Pad all lines to the same width
+    let grid: Vec<Vec<u8>> = lines
         .iter()
-        .map(|l| format!("{:<width$}", l, width = max_width))
+        .map(|l| {
+            let mut v = l.as_bytes().to_vec();
+            v.resize(max_width, b' ');
+            v
+        })
         .collect();
 
-    eprintln!("=== Part 2: Right-to-Left ===");
+    let is_blank_col = |col: usize, g: &Vec<Vec<u8>>| -> bool {
+        g.iter().all(|row| row[col] == b' ')
+    };
 
-    // Identify problem boundaries (columns that are all spaces separate problems)
-    let mut problem_starts = Vec::new();
-    let mut in_problem = false;
-
+    // Find all operator columns (non-space in last row)
+    let mut ops: Vec<(usize, u8)> = Vec::new();
     for col in 0..max_width {
-        let is_empty_col = lines.iter().all(|l| {
-            col >= l.len() || l.chars().nth(l.len().min(col)) == Some(' ')
-        });
-
-        if !is_empty_col && !in_problem {
-            problem_starts.push(col);
-            in_problem = true;
-        } else if is_empty_col && in_problem {
-            in_problem = false;
+        let ch = grid[last_row][col];
+        if ch != b' ' {
+            ops.push((col, ch));
         }
     }
 
     let mut grand_total: u64 = 0;
 
-    // Process each problem from right to left
-    for (prob_idx, &start_col) in problem_starts.iter().rev().enumerate() {
-        // Find end of this problem
-        let mut end_col = start_col;
-        while end_col < max_width && !lines.iter().all(|l| {
-            end_col >= l.len() || l.chars().nth(end_col) == Some(' ')
-        }) {
-            end_col += 1;
+    // Process problems right-to-left
+    for (problem_idx, &(op_col, op_ch)) in ops.iter().rev().enumerate() {
+        // Expand left until a blank column
+        let mut start = op_col;
+        while start > 0 && !is_blank_col(start - 1, &grid) {
+            start -= 1;
         }
-        end_col -= 1; // Back up to last non-empty column
+        // Expand right until a blank column
+        let mut end = op_col;
+        while end + 1 < max_width && !is_blank_col(end + 1, &grid) {
+            end += 1;
+        }
 
-        eprintln!("\nProblem {} (processing RTL, cols {}-{}):", prob_idx + 1, start_col, end_col);
+        eprintln!("\nProblem {}: cols {}..{} (op '{}' at col {})", problem_idx + 1, start, end, op_ch as char, op_col);
 
-        // Find operation (last row within this problem)
-        let mut operation = String::new();
-        for col in start_col..=end_col {
-            if let Some(ch) = lines[last_line_idx].chars().nth(col) {
-                if ch != ' ' {
-                    operation.push(ch);
+        let mut numbers = Vec::new();
+
+        // Read columns right-to-left within this problem
+        for col in (start..=end).rev() {
+            // Build number from this column (top-to-bottom, skipping bottom op row)
+            let mut digits = Vec::new();
+            for row in 0..last_row {
+                let ch = grid[row][col];
+                if ch != b' ' {
+                    digits.push(ch as char);
                 }
             }
-        }
-        let operation = operation.trim();
-        eprintln!("  Operation: '{}'", operation);
 
-        // Build numbers for each row by reading columns right-to-left
-        let mut row_numbers: Vec<String> = vec![String::new(); last_line_idx];
-
-        eprintln!("  Reading columns right-to-left:");
-        // Read columns right-to-left
-        for col in (start_col..=end_col).rev() {
-            // Skip if this column has the operation
-            let has_operation = lines[last_line_idx]
-                .chars()
-                .nth(col)
-                .map(|ch| ch != ' ')
-                .unwrap_or(false);
-
-            if has_operation {
-                eprintln!("    Col {}: [operation column - skipped]", col);
+            if digits.is_empty() {
                 continue;
             }
 
-            eprintln!("    Col {}:", col);
-            // Each column provides one digit to each row
-            for row in 0..last_line_idx {
-                if let Some(ch) = lines[row].chars().nth(col) {
-                    if ch != ' ' {
-                        eprintln!("      Row {}: '{}' -> prepending to row_numbers[{}] = '{}'",
-                            row, ch, row, row_numbers[row]);
-                        // Prepend digit (reading RTL, so first column is least significant)
-                        row_numbers[row].insert(0, ch);
-                    }
-                }
+            let num_str: String = digits.into_iter().collect();
+            if let Ok(num) = num_str.parse::<u64>() {
+                eprintln!("  Col {} -> {}", col, num);
+                numbers.push(num);
             }
         }
-
-        eprintln!("  Numbers built from rows:");
-        for (i, s) in row_numbers.iter().enumerate() {
-            if !s.is_empty() {
-                eprintln!("    Row {}: '{}'", i, s);
-            }
-        }
-
-        // Parse numbers
-        let numbers: Vec<u64> = row_numbers
-            .iter()
-            .filter_map(|s| {
-                if s.is_empty() {
-                    None
-                } else {
-                    s.parse::<u64>().ok()
-                }
-            })
-            .collect();
 
         if numbers.is_empty() {
-            eprintln!("  No numbers found - skipping");
+            eprintln!("  (no numbers found)");
             continue;
         }
 
-        eprintln!("  Parsed numbers: {:?}", numbers);
-
-        // Compute result
-        let result = match operation {
-            "*" => {
-                let prod = numbers.iter().product::<u64>();
-                eprintln!("  Calculation: {} = {}",
-                    numbers.iter().map(|n| n.to_string()).collect::<Vec<_>>().join(" * "),
-                    prod
-                );
-                prod
-            }
-            "+" => {
-                let sum = numbers.iter().sum::<u64>();
-                eprintln!("  Calculation: {} = {}",
-                    numbers.iter().map(|n| n.to_string()).collect::<Vec<_>>().join(" + "),
-                    sum
-                );
+        // Compute
+        let result = match op_ch {
+            b'+' => {
+                let sum: u64 = numbers.iter().sum();
+                eprintln!("  Calc: {} = {}", numbers.iter().map(|n| n.to_string()).collect::<Vec<_>>().join(" + "), sum);
                 sum
             }
-            _ => return Err(format!("Unknown operation: {}", operation).into()),
+            b'*' => {
+                let prod: u64 = numbers.iter().product();
+                eprintln!("  Calc: {} = {}", numbers.iter().map(|n| n.to_string()).collect::<Vec<_>>().join(" * "), prod);
+                prod
+            }
+            _ => return Err(format!("Unknown operation: {}", op_ch as char).into()),
         };
 
-        eprintln!("  Problem result: {}", result);
         grand_total += result;
+        eprintln!("  Problem result: {}", result);
         eprintln!("  Running total: {}", grand_total);
     }
 
@@ -368,11 +324,9 @@ mod tests {
 3
 +";
         let total = solve_part2(input).unwrap();
-        // Reading RTL: each row forms a number
-        // Row 0: 5
-        // Row 1: 3
-        // 5 + 3 = 8
-        assert_eq!(total, 8);
+        // Single column forms one number from top-to-bottom: "53"
+        // 53 = 53
+        assert_eq!(total, 53);
     }
 
     #[test]
@@ -382,8 +336,9 @@ mod tests {
 5
 *";
         let total = solve_part2(input).unwrap();
-        // 4 * 5 = 20
-        assert_eq!(total, 20);
+        // Single column forms one number from top-to-bottom: "45"
+        // 45 = 45
+        assert_eq!(total, 45);
     }
 
     #[test]
