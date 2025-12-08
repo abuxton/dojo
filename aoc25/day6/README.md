@@ -1,77 +1,62 @@
-# Advent of Code 2025 Day 6: Trash Compactor
+## Solution Overview
 
-Welcome to Advent of Code 2025 Day 6 <https://adventofcode.com/2025/day/6>, maintained by abuxton.
+This repository implements both parts in Rust:
 
-## Description
+- **Part 1 (left-to-right):** Each problem is a horizontal block. Each row (except the last) is a full number. The last row is the operator (`+` or `*`). Problems are separated by a fully blank column. For each problem, apply the operator to all numbers and sum all problem results.
+- **Part 2 (right-to-left, columns-as-numbers):** Each problem is anchored by its operator in the bottom row. The problem spans all contiguous non-blank columns adjacent to that operator (until a fully blank column). Within a problem, every column (excluding the operator row) forms a single number by reading digits top-to-bottom. Process columns right-to-left (the rightmost column is the first operand). Apply the operator to all column-numbers and sum all problem results.
 
-Advent of Code 2025 Day 6, implemented in Rust via vibe coding and testing.
+## Parsing Rules
 
-### Part One
+- Pad rows to equal width for column access.
+- A **blank column** (all spaces) separates problems.
+- **Part 1:** Rows → numbers; bottom row → operator.
+- **Part 2:** Columns → numbers (top-to-bottom digits); bottom row char → operator; columns consumed right-to-left within a problem.
 
-After helping the Elves in the kitchen, you were taking a break and helping them re-enact a movie scene when you over-enthusiastically jumped into the garbage chute!
+## Examples
 
-A brief fall later, you find yourself in a garbage smasher. Unfortunately, the door's been magnetically sealed.
+Given the sample worksheet:
 
-As you try to find a way out, you are approached by a family of cephalopods! They're pretty sure they can get the door open, but it will take some time. While you wait, they're curious if you can help the youngest cephalopod with her math homework.
-
-Cephalopod math doesn't look that different from normal math. The math worksheet (your puzzle input) consists of a list of problems; each problem has a group of numbers that need to be either added (+) or multiplied (*) together.
-
-However, the problems are arranged a little strangely; they seem to be presented next to each other in a very long horizontal list. For example:
-
+```
 123 328  51 64
  45 64  387 23
   6 98  215 314
 *   +   *   +
-Each problem's numbers are arranged vertically; at the bottom of the problem is the symbol for the operation that needs to be performed. Problems are separated by a full column of only spaces. The left/right alignment of numbers within each problem can be ignored.
+```
 
-So, this worksheet contains four problems:
+**Part 1:**
+- 123 * 45 * 6 = 33,210
+- 328 + 64 + 98 = 490
+- 51 * 387 * 215 = 4,243,455
+- 64 + 23 + 314 = 401
+**Total:** 4,277,556
 
-123 * 45 * 6 = 33210
-328 + 64 + 98 = 490
-51 * 387 * 215 = 4243455
-64 + 23 + 314 = 401
-To check their work, cephalopod students are given the grand total of adding together all of the answers to the individual problems. In this worksheet, the grand total is 33210 + 490 + 4243455 + 401 = 4277556.
-
-Of course, the actual worksheet is much wider. You'll need to make sure to unroll it completely so that you can read the problems clearly.
-
-Solve the problems on the math worksheet.
-
-**Question:** What is the grand total found by adding together all of the answers to the individual problems?
-
-### Part Two
-
-The big cephalopods come back to check on how things are going. When they see that your grand total doesn't match the one expected by the worksheet, they realize they forgot to explain how to read cephalopod math.
-
-Cephalopod math is written right-to-left in columns. Each number is given in its own column, with the most significant digit at the top and the least significant digit at the bottom. (Problems are still separated with a column consisting only of spaces, and the symbol at the bottom of the problem is still the operator to use.)
-
-Here's the example worksheet again:
-
-123 328  51 64
- 45 64  387 23
-  6 98  215 314
-*   +   *   +
-Reading the problems right-to-left one column at a time, the problems are now quite different:
-
-The rightmost problem is 4 + 431 + 623 = 1058
-The second problem from the right is 175 * 581 * 32 = 3253600
-The third problem from the right is 8 + 248 + 369 = 625
-Finally, the leftmost problem is 356 * 24 * 1 = 8544
-Now, the grand total is 1058 + 3253600 + 625 + 8544 = 3263827.
-
-Solve the problems on the math worksheet again.
-
-**Question:** What is the grand total found by adding together all of the answers to the individual problems?
-
-
+**Part 2 (columns as numbers, read right-to-left per problem):**
+- Rightmost `+`: columns → 4, 431, 623 → 4 + 431 + 623 = 1,058
+- Next `*`: columns → 175, 581, 32 → 175 * 581 * 32 = 3,253,600
+- Next `+`: columns → 8, 248, 369 → 8 + 248 + 369 = 625
+- Leftmost `*`: columns → 356, 24, 1 → 356 * 24 * 1 = 8,544
+**Total:** 3,263,827
 
 ## Usage
 
-usage instructions
+```bash
+# Default input.txt
+cargo run --release
 
-## Contributing
+# Custom input file
+cargo run --release -- path/to/input.txt
+```
 
-Contributions are always welcome! If you're interested in contributing, please review our [contributing guidelines](./CONTRIBUTING.md).
+Output is two lines: Part 1 answer, then Part 2 answer.
 
-## License
+## Testing
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+```bash
+cargo test --release -- --nocapture
+```
+
+Key tests:
+- Example from README (Part 1 and Part 2 totals)
+- Single-column add (expects `53`)
+- Single-column multiply (expects `45`)
+- Multi-problem, multi-number scenarios for Part 1 and Part 2
