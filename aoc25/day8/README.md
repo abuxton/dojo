@@ -1,6 +1,6 @@
 # Advent of Code 2025 Day 8: Playground
 
-Welcome to Advent of Code 2025 Day 7 <https://adventofcode.com/2025/day/8>, maintained by abuxton.
+Welcome to Advent of Code 2025 Day 8 <https://adventofcode.com/2025/day/8>, maintained by abuxton.
 
 ## Description
 
@@ -65,8 +65,8 @@ After making the ten shortest connections, there are 11 circuits: one circuit wh
 ## Solution
 
 - Parse X,Y,Z coordinates per line.
-- Build all pairwise squared distances, sort ascending.
-- Process the 1000 closest pairs in order; union their endpoints (even if already connected, the pair still counts toward the 1000 processed).
+- Build all pairwise squared Euclidean distances (deterministic tie-break: distance, then i, then j).
+- Process the closest pairs up to a configurable limit (`pair_limit`; default 1000); union their endpoints (even if already connected, the pair still counts toward the processed total).
 - Collect component sizes, take the three largest, and multiply.
 
 ## Usage
@@ -75,16 +75,17 @@ After making the ten shortest connections, there are 11 circuits: one circuit wh
 # Default: input.txt, process 1000 closest pairs
 cargo run --release
 
-# Custom input and custom pair count (e.g., 10 for the example)
-cargo run --release -- path/to/input.txt 10
-
-# Run tests
-cargo test --release
+# Custom input and/or pair limit (key=value args)
+cargo run --release -- input=path/to/input.txt pair_limit=10
 ```
 
 The binary prints the Part 1 answer: the product of the three largest circuit sizes after processing the given number of closest connections.
 
-## Implementation Notes
+## Testing
+
+```bash
+cargo test --release
+```
 
 ## License
 
