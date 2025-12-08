@@ -25,7 +25,7 @@ fn parse(input: &str) -> Vec<Pt> {
         .collect()
 }
 
-// Squared Euclidean distance (using abs_diff, clippy-clean)
+// Squared Euclidean distance (clippy-clean via abs_diff)
 fn dist2(a: Pt, b: Pt) -> u128 {
     let dx = a.x.abs_diff(b.x) as u128;
     let dy = a.y.abs_diff(b.y) as u128;
@@ -50,17 +50,18 @@ impl Dsu {
         }
         self.p[x]
     }
-    fn union(&mut self, a: usize, b: usize) {
+    fn union(&mut self, a: usize, b: usize) -> bool {
         let mut ra = self.find(a);
         let mut rb = self.find(b);
         if ra == rb {
-            return;
+            return false;
         }
         if self.sz[ra] < self.sz[rb] {
             std::mem::swap(&mut ra, &mut rb);
         }
         self.p[rb] = ra;
         self.sz[ra] += self.sz[rb];
+        true
     }
     fn component_sizes(&mut self) -> Vec<u128> {
         let mut out = Vec::new();
@@ -73,8 +74,8 @@ impl Dsu {
     }
 }
 
-/// Solve with a configurable number of processed pairs (for examples/tests and runtime parameter).
-pub fn solve_with_k(input: &str, k: usize) -> u128 {
+/// Solve Part 1 with a configurable number of processed pairs.
+pub fn solve_part1_with_limit(input: &str, pair_limit: usize) -> u128 {
     let pts = parse(input);
     let n = pts.len();
     if n == 0 {
@@ -87,7 +88,6 @@ pub fn solve_with_k(input: &str, k: usize) -> u128 {
             edges.push((dist2(pts[i], pts[j]), i, j));
         }
     }
-    // Deterministic ordering: distance, then i, then j (ties matter)
     edges.sort_by(|(d1, i1, j1), (d2, i2, j2)| d1.cmp(d2).then(i1.cmp(i2)).then(j1.cmp(j2)));
 
     let mut dsu = Dsu::new(n);
@@ -98,7 +98,7 @@ pub fn solve_with_k(input: &str, k: usize) -> u128 {
             dsu.union(a, b);
         }
         processed += 1;
-        if processed == k {
+        if processed == pair_limit {
             break;
         }
     }
@@ -111,17 +111,52 @@ pub fn solve_with_k(input: &str, k: usize) -> u128 {
     a * b * c
 }
 
-/// Part 1 helper: process `k` closest pairs and return product of the three largest circuits.
-pub fn solve(input: &str, k: usize) -> u128 {
-    solve_with_k(input, k)
+/// Part 1: default limit 1000.
+pub fn solve_part1(input: &str) -> u128 {
+    solve_part1_with_limit(input, 1000)
+}
+
+/// Part 2: connect until a single circuit; return product of X coords of the last edge used.
+pub fn solve_part2(input: &str) -> i128 {
+    let pts = parse(input);
+    let n = pts.len();
+	// println!("Number of points: {}", n);
+
+    if n <= 1 {
+        return 0;
+    }
+
+    let mut edges = Vec::new();
+    for i in 0..n {
+        for j in i + 1..n {
+            edges.push((dist2(pts[i], pts[j]), i, j));
+        }
+    }
+
+    edges.sort_by(|(d1, i1, j1), (d2, i2, j2)| d1.cmp(d2).then(i1.cmp(i2)).then(j1.cmp(j2)));
+
+    let mut dsu = Dsu::new(n);
+    let mut components = n;
+    let mut last_product: i128 = 0;
+
+    for (_, a, b) in edges.into_iter() {
+        if dsu.union(a, b) {
+            components -= 1;
+            last_product = pts[a].x as i128 * pts[b].x as i128;
+            if components == 1 {
+                break;
+            }
+        }
+    }
+
+    last_product
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    const EXAMPLE: &str = "
-162,817,812
+    const EXAMPLE: &str = "162,817,812
 57,618,57
 906,360,560
 592,479,940
@@ -144,6 +179,11 @@ mod tests {
 
     #[test]
     fn example_after_10_pairs() {
-        assert_eq!(solve_with_k(EXAMPLE, 10), 40);
+        assert_eq!(solve_part1_with_limit(EXAMPLE, 10), 40);
+    }
+
+    #[test]
+    fn example_part2_last_edge_product() {
+        assert_eq!(solve_part2(EXAMPLE), 25_272);
     }
 }

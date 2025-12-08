@@ -59,27 +59,27 @@ After making the ten shortest connections, there are 11 circuits: one circuit wh
 
 **Question:** Afterward, what do you get if you multiply together the sizes of the three largest circuits?
 
+### Solution Outline
 
-
-
-## Solution
-
-- Parse X,Y,Z coordinates per line.
-- Build all pairwise squared Euclidean distances (deterministic tie-break: distance, then i, then j).
-- Process the closest pairs up to a configurable limit (`pair_limit`; default 1000); union their endpoints (even if already connected, the pair still counts toward the processed total).
-- Collect component sizes, take the three largest, and multiply.
+- Parse each line as `X,Y,Z`.
+- Build all pairwise squared Euclidean distances.
+- Sort edges deterministically by (distance, i, j).
+- Part One: process a configurable number of closest edges (`pair_limit`, default 1000); union endpoints; count processed edges even if they join already-connected boxes; take top-3 component sizes and multiply.
+- Part Two: keep unioning in sorted order until one component remains; return the product of the X coordinates of the last edge used.
 
 ## Usage
 
 ```bash
-# Default: input.txt, process 1000 closest pairs
+# Default: input.txt, process 1000 closest pairs for Part One
 cargo run --release
 
 # Custom input and/or pair limit (key=value args)
 cargo run --release -- input=path/to/input.txt pair_limit=10
 ```
 
-The binary prints the Part 1 answer: the product of the three largest circuit sizes after processing the given number of closest connections.
+Output:
+1. Part One answer (product of three largest circuits after `pair_limit` edges)
+2. Part Two answer (product of X coordinates of the final connecting edge)
 
 ## Testing
 
