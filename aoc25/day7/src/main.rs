@@ -12,6 +12,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 /// Simulate tachyon beams and count how many times they are split.
+// ...existing code...
 pub fn solve(input: &str) -> u64 {
     let grid: Vec<Vec<u8>> = input
         .lines()
@@ -30,7 +31,8 @@ pub fn solve(input: &str) -> u64 {
 
     let mut splits: u64 = 0;
     let mut q = VecDeque::new();
-    let mut seen = HashSet::new();
+    let mut seen = HashSet::new();          // beam start positions
+    let mut split_seen = HashSet::new();    // splitters already processed
 
     // Beam starts just below S
     if sr + 1 < rows {
@@ -42,16 +44,19 @@ pub fn solve(input: &str) -> u64 {
         while r < rows {
             let cell = grid[r][c];
             if cell == b'^' {
-                splits += 1;
-                // emit left
-                if c > 0 && seen.insert((r, c - 1)) {
-                    q.push_back((r, c - 1));
+                // Only split this splitter once
+                if split_seen.insert((r, c)) {
+                    splits += 1;
+                    // emit left
+                    if c > 0 && seen.insert((r, c - 1)) {
+                        q.push_back((r, c - 1));
+                    }
+                    // emit right
+                    if c + 1 < cols && seen.insert((r, c + 1)) {
+                        q.push_back((r, c + 1));
+                    }
                 }
-                // emit right
-                if c + 1 < cols && seen.insert((r, c + 1)) {
-                    q.push_back((r, c + 1));
-                }
-                break; // original beam stops at splitter
+                break; // beam stops at splitter regardless
             }
             r += 1;
         }
