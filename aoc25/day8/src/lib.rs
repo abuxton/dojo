@@ -25,11 +25,12 @@ fn parse(input: &str) -> Vec<Pt> {
         .collect()
 }
 
-fn dist(a: Pt, b: Pt) -> u128 {
+// Squared Euclidean distance (using abs_diff, clippy-clean)
+fn dist2(a: Pt, b: Pt) -> u128 {
     let dx = a.x.abs_diff(b.x) as u128;
     let dy = a.y.abs_diff(b.y) as u128;
     let dz = a.z.abs_diff(b.z) as u128;
-    dx + dy + dz
+    dx * dx + dy * dy + dz * dz
 }
 
 struct Dsu {
@@ -83,7 +84,7 @@ pub fn solve_with_k(input: &str, k: usize) -> u128 {
     let mut edges = Vec::new();
     for i in 0..n {
         for j in i + 1..n {
-            edges.push((dist(pts[i], pts[j]), i, j));
+            edges.push((dist2(pts[i], pts[j]), i, j));
         }
     }
     // Deterministic ordering: distance, then i, then j (ties matter)
