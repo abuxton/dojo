@@ -118,7 +118,8 @@ pub fn solve_part1(input: &str) -> Result<u64, Box<dyn Error>> {
 }
 
 /// Part 2: Parse problems right-to-left.
-/// Each column contains digits of a single number (top = most significant).
+/// Each column contains one digit for each number (most significant at top).
+/// Columns are read right-to-left within each problem.
 pub fn solve_part2(input: &str) -> Result<u64, Box<dyn Error>> {
     let lines: Vec<&str> = input.lines().collect();
     if lines.is_empty() {
@@ -126,6 +127,7 @@ pub fn solve_part2(input: &str) -> Result<u64, Box<dyn Error>> {
     }
 
     let max_width = lines.iter().map(|l| l.len()).max().unwrap_or(0);
+    let last_line_idx = lines.len() - 1;
 
     // Pad all lines to same width
     let lines: Vec<String> = lines
@@ -133,98 +135,90 @@ pub fn solve_part2(input: &str) -> Result<u64, Box<dyn Error>> {
         .map(|l| format!("{:<width$}", l, width = max_width))
         .collect();
 
-    let last_line_idx = lines.len() - 1;
-
-    // Identify problem boundaries by reading right-to-left
-    // A column of all spaces separates problems
-    let mut problem_boundaries = Vec::new();
-    let mut in_problem = false;
-
-    for col in (0..max_width).rev() {
-        let is_empty_col = lines.iter().all(|l| {
-            col >= l.len() || l.chars().nth(col) == Some(' ')
-        });
-
-        if !is_empty_col && !in_problem {
-            problem_boundaries.push(col);
-            in_problem = true;
-        } else if is_empty_col && in_problem {
-            problem_boundaries.push(col);
-            in_problem = false;
-        }
-    }
-
-    if in_problem {
-        problem_boundaries.push(0);
-    }
-
-    // Reverse to process problems left-to-right
-    problem_boundaries.reverse();
-
     let mut grand_total: u64 = 0;
 
-    // Process each problem (defined by its boundaries)
-    for i in (0..problem_boundaries.len()).step_by(2) {
-        if i + 1 >= problem_boundaries.len() {
-            break;
+    // Find all operation positions (non-space chars in last line)
+    let mut operation_positions = Vec::new();
+    for (col, ch) in lines[last_line_idx].chars().enumerate() {
+        if ch != ' ' {
+            operation_positions.push((col, ch));
+        }
+    }
+
+    // Process each problem (from right to left)
+    for &(op_col, op_char) in operation_positions.iter().rev() {
+        let operation = op_char.to_string();
+
+        // Find the extent of this problem (columns between separators)
+        // Look left from operation to find start of problem
+        let mut start_col = op_col;
+        while start_col > 0 {
+            let prev_col = start_col - 1;
+            let is_separator = lines.iter().all(|l| {
+                prev_col >= l.len() || l.chars().nth(prev_col) == Some(' ')
+            });
+            if is_separator {
+                break;
+            }
+            start_col = prev_col;
         }
 
-        let start_col = problem_boundaries[i];
-        let end_col = problem_boundaries[i + 1];
+        // Look right from operation to find end of problem
+        let mut end_col = op_col;
+        while end_col < max_width - 1 {
+            let next_col = end_col + 1;
+            let is_separator = lines.iter().all(|l| {
+                next_col >= l.len() || l.chars().nth(next_col) == Some(' ')
+            });
+            if is_separator {
+                break;
+            }
+            end_col = next_col;
+        }
 
-        // Get operation (last line in this column range)
-        let operation = lines[last_line_idx]
-            .chars()
-            .skip(start_col)
-            .take(end_col - start_col)
-            .collect::<String>()
-            .trim()
-            .to_string();
+        // Count how many numbers we have (non-space chars in any data row)
+        let num_count = (0..last_line_idx)
+            .map(|row| {
+                (start_col..=end_col)
+                    .filter(|&col| {
+                        lines[row].chars().nth(col).unwrap_or(' ') != ' '
+                    })
+                    .count()
+                    .min(1)
+            })
+            .sum::<usize>();
 
-        if operation.is_empty() {
+        if num_count == 0 {
             continue;
         }
 
-        // Read columns right-to-left within this problem
-        let mut numbers = Vec::new();
-        let mut current_number_digits = Vec::new();
+        // Build numbers by reading columns right-to-left
+        // Initialize numbers as empty strings for each row
+        let mut number_strings: Vec<String> = vec![String::new(); last_line_idx];
 
-        for col in (start_col..end_col).rev() {
-            // Check if this is a separator column (all spaces in data rows)
-            let is_separator = (0..last_line_idx).all(|row| {
-                col >= lines[row].len() || lines[row].chars().nth(col) == Some(' ')
-            });
+        // Read columns from right to left (least significant to most significant)
+        for col in (start_col..=end_col).rev() {
+            if col == op_col {
+                continue; // Skip operation column
+            }
 
-            if is_separator && !current_number_digits.is_empty() {
-                // Convert digits to number - FIX: use join instead of collect
-                let num_str: String = current_number_digits.join("");
-                if let Ok(num) = num_str.parse::<u64>() {
-                    numbers.push(num);
-                }
-                current_number_digits.clear();
-            } else if !is_separator {
-                // Collect digits from top to bottom
-                let mut digit_str = String::new();
-                for row in 0..last_line_idx {
-                    if let Some(ch) = lines[row].chars().nth(col) {
-                        if ch != ' ' {
-                            digit_str.push(ch);
-                        }
+            for row in 0..last_line_idx {
+                if let Some(ch) = lines[row].chars().nth(col) {
+                    if ch != ' ' {
+                        number_strings[row].push(ch);
                     }
                 }
-                if !digit_str.is_empty() {
-                    current_number_digits.push(digit_str);
-                }
             }
         }
 
-        // Add last number if exists - FIX: use join instead of collect
-        if !current_number_digits.is_empty() {
-            let num_str: String = current_number_digits.join("");
-            if let Ok(num) = num_str.parse::<u64>() {
-                numbers.push(num);
-            }
-        }
+        // Reverse each number string (we built them backwards)
+        let numbers: Vec<u64> = number_strings
+            .iter()
+            .filter_map(|s| {
+                let reversed: String = s.chars().rev().collect();
+                reversed.parse::<u64>().ok()
+            })
+            .collect();
 
         if numbers.is_empty() {
             continue;
@@ -234,9 +228,7 @@ pub fn solve_part2(input: &str) -> Result<u64, Box<dyn Error>> {
         let result = match operation.as_str() {
             "*" => numbers.iter().product::<u64>(),
             "+" => numbers.iter().sum::<u64>(),
-            _ => {
-                return Err(format!("Unknown operation: {}", operation).into());
-            }
+            _ => return Err(format!("Unknown operation: {}", operation).into()),
         };
 
         grand_total += result;
