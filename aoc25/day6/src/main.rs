@@ -43,6 +43,8 @@ pub fn solve_part1(input: &str) -> Result<u64, Box<dyn Error>> {
         .map(|l| format!("{:<width$}", l, width = max_width))
         .collect();
 
+    eprintln!("\n=== Part 1: Left-to-Right ===");
+
     // Identify problem boundaries (columns that are all spaces)
     let mut problem_starts = Vec::new();
     let mut in_problem = false;
@@ -64,7 +66,7 @@ pub fn solve_part1(input: &str) -> Result<u64, Box<dyn Error>> {
     let mut grand_total: u64 = 0;
     let last_line_idx = lines.len() - 1;
 
-    for &start_col in &problem_starts {
+    for (prob_num, &start_col) in problem_starts.iter().enumerate() {
         // Find end of this problem (next empty column or end of input)
         let mut end_col = start_col;
         while end_col < max_width && !lines.iter().all(|l| {
@@ -104,8 +106,28 @@ pub fn solve_part1(input: &str) -> Result<u64, Box<dyn Error>> {
 
         // Compute result based on operation
         let result = match operation {
-            "*" => numbers.iter().product::<u64>(),
-            "+" => numbers.iter().sum::<u64>(),
+            "*" => {
+                let prod = numbers.iter().product::<u64>();
+                eprintln!("Problem {} (cols {}-{}): {} = {}",
+                    prob_num + 1,
+                    start_col,
+                    end_col - 1,
+                    numbers.iter().map(|n| n.to_string()).collect::<Vec<_>>().join(" * "),
+                    prod
+                );
+                prod
+            }
+            "+" => {
+                let sum = numbers.iter().sum::<u64>();
+                eprintln!("Problem {} (cols {}-{}): {} = {}",
+                    prob_num + 1,
+                    start_col,
+                    end_col - 1,
+                    numbers.iter().map(|n| n.to_string()).collect::<Vec<_>>().join(" + "),
+                    sum
+                );
+                sum
+            }
             _ => {
                 return Err(format!("Unknown operation: {}", operation).into());
             }
@@ -114,12 +136,13 @@ pub fn solve_part1(input: &str) -> Result<u64, Box<dyn Error>> {
         grand_total += result;
     }
 
+    eprintln!("Part 1 Total: {}\n", grand_total);
     Ok(grand_total)
 }
 
 /// Part 2: Parse problems right-to-left.
-/// Each column contains one digit for each number (most significant at top).
-/// Columns are read right-to-left within each problem.
+/// Within each problem, read columns right-to-left.
+/// Each column provides one digit to each row's number (ones, tens, hundreds, ...).
 pub fn solve_part2(input: &str) -> Result<u64, Box<dyn Error>> {
     let lines: Vec<&str> = input.lines().collect();
     if lines.is_empty() {
@@ -135,105 +158,137 @@ pub fn solve_part2(input: &str) -> Result<u64, Box<dyn Error>> {
         .map(|l| format!("{:<width$}", l, width = max_width))
         .collect();
 
-    let mut grand_total: u64 = 0;
+    eprintln!("=== Part 2: Right-to-Left ===");
 
-    // Find all operation positions (non-space chars in last line)
-    let mut operation_positions = Vec::new();
-    for (col, ch) in lines[last_line_idx].chars().enumerate() {
-        if ch != ' ' {
-            operation_positions.push((col, ch));
+    // Identify problem boundaries (columns that are all spaces separate problems)
+    let mut problem_starts = Vec::new();
+    let mut in_problem = false;
+
+    for col in 0..max_width {
+        let is_empty_col = lines.iter().all(|l| {
+            col >= l.len() || l.chars().nth(l.len().min(col)) == Some(' ')
+        });
+
+        if !is_empty_col && !in_problem {
+            problem_starts.push(col);
+            in_problem = true;
+        } else if is_empty_col && in_problem {
+            in_problem = false;
         }
     }
 
-    // Process each problem (from right to left)
-    for &(op_col, op_char) in operation_positions.iter().rev() {
-        let operation = op_char.to_string();
+    let mut grand_total: u64 = 0;
 
-        // Find the extent of this problem (columns between separators)
-        // Look left from operation to find start of problem
-        let mut start_col = op_col;
-        while start_col > 0 {
-            let prev_col = start_col - 1;
-            let is_separator = lines.iter().all(|l| {
-                prev_col >= l.len() || l.chars().nth(prev_col) == Some(' ')
-            });
-            if is_separator {
-                break;
+    // Process each problem from right to left
+    for (prob_idx, &start_col) in problem_starts.iter().rev().enumerate() {
+        // Find end of this problem
+        let mut end_col = start_col;
+        while end_col < max_width && !lines.iter().all(|l| {
+            end_col >= l.len() || l.chars().nth(end_col) == Some(' ')
+        }) {
+            end_col += 1;
+        }
+        end_col -= 1; // Back up to last non-empty column
+
+        eprintln!("\nProblem {} (processing RTL, cols {}-{}):", prob_idx + 1, start_col, end_col);
+
+        // Find operation (last row within this problem)
+        let mut operation = String::new();
+        for col in start_col..=end_col {
+            if let Some(ch) = lines[last_line_idx].chars().nth(col) {
+                if ch != ' ' {
+                    operation.push(ch);
+                }
             }
-            start_col = prev_col;
         }
+        let operation = operation.trim();
+        eprintln!("  Operation: '{}'", operation);
 
-        // Look right from operation to find end of problem
-        let mut end_col = op_col;
-        while end_col < max_width - 1 {
-            let next_col = end_col + 1;
-            let is_separator = lines.iter().all(|l| {
-                next_col >= l.len() || l.chars().nth(next_col) == Some(' ')
-            });
-            if is_separator {
-                break;
-            }
-            end_col = next_col;
-        }
+        // Build numbers for each row by reading columns right-to-left
+        let mut row_numbers: Vec<String> = vec![String::new(); last_line_idx];
 
-        // Count how many numbers we have (non-space chars in any data row)
-        let num_count = (0..last_line_idx)
-            .map(|row| {
-                (start_col..=end_col)
-                    .filter(|&col| {
-                        lines[row].chars().nth(col).unwrap_or(' ') != ' '
-                    })
-                    .count()
-                    .min(1)
-            })
-            .sum::<usize>();
-
-        if num_count == 0 {
-            continue;
-        }
-
-        // Build numbers by reading columns right-to-left
-        // Initialize numbers as empty strings for each row
-        let mut number_strings: Vec<String> = vec![String::new(); last_line_idx];
-
-        // Read columns from right to left (least significant to most significant)
+        eprintln!("  Reading columns right-to-left:");
+        // Read columns right-to-left
         for col in (start_col..=end_col).rev() {
-            if col == op_col {
-                continue; // Skip operation column
+            // Skip if this column has the operation
+            let has_operation = lines[last_line_idx]
+                .chars()
+                .nth(col)
+                .map(|ch| ch != ' ')
+                .unwrap_or(false);
+
+            if has_operation {
+                eprintln!("    Col {}: [operation column - skipped]", col);
+                continue;
             }
 
+            eprintln!("    Col {}:", col);
+            // Each column provides one digit to each row
             for row in 0..last_line_idx {
                 if let Some(ch) = lines[row].chars().nth(col) {
                     if ch != ' ' {
-                        number_strings[row].push(ch);
+                        eprintln!("      Row {}: '{}' -> prepending to row_numbers[{}] = '{}'",
+                            row, ch, row, row_numbers[row]);
+                        // Prepend digit (reading RTL, so first column is least significant)
+                        row_numbers[row].insert(0, ch);
                     }
                 }
             }
         }
 
-        // Reverse each number string (we built them backwards)
-        let numbers: Vec<u64> = number_strings
+        eprintln!("  Numbers built from rows:");
+        for (i, s) in row_numbers.iter().enumerate() {
+            if !s.is_empty() {
+                eprintln!("    Row {}: '{}'", i, s);
+            }
+        }
+
+        // Parse numbers
+        let numbers: Vec<u64> = row_numbers
             .iter()
             .filter_map(|s| {
-                let reversed: String = s.chars().rev().collect();
-                reversed.parse::<u64>().ok()
+                if s.is_empty() {
+                    None
+                } else {
+                    s.parse::<u64>().ok()
+                }
             })
             .collect();
 
         if numbers.is_empty() {
+            eprintln!("  No numbers found - skipping");
             continue;
         }
 
+        eprintln!("  Parsed numbers: {:?}", numbers);
+
         // Compute result
-        let result = match operation.as_str() {
-            "*" => numbers.iter().product::<u64>(),
-            "+" => numbers.iter().sum::<u64>(),
+        let result = match operation {
+            "*" => {
+                let prod = numbers.iter().product::<u64>();
+                eprintln!("  Calculation: {} = {}",
+                    numbers.iter().map(|n| n.to_string()).collect::<Vec<_>>().join(" * "),
+                    prod
+                );
+                prod
+            }
+            "+" => {
+                let sum = numbers.iter().sum::<u64>();
+                eprintln!("  Calculation: {} = {}",
+                    numbers.iter().map(|n| n.to_string()).collect::<Vec<_>>().join(" + "),
+                    sum
+                );
+                sum
+            }
             _ => return Err(format!("Unknown operation: {}", operation).into()),
         };
 
+        eprintln!("  Problem result: {}", result);
         grand_total += result;
+        eprintln!("  Running total: {}", grand_total);
     }
 
+    eprintln!("\nPart 2 Total: {}\n", grand_total);
     Ok(grand_total)
 }
 
@@ -313,8 +368,9 @@ mod tests {
 3
 +";
         let total = solve_part2(input).unwrap();
-        // Column read top-to-bottom: 5, 3 = 53 (wait, that's wrong)
-        // Actually: each column is a number, so 5 and 3 are separate numbers
+        // Reading RTL: each row forms a number
+        // Row 0: 5
+        // Row 1: 3
         // 5 + 3 = 8
         assert_eq!(total, 8);
     }
