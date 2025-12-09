@@ -28,7 +28,13 @@ pub fn solve_part1(input: &str) -> u32 {
             let height = (max_y - min_y) as u32;
             let area = width * height;
 
-            max_area = max_area.max(area);
+            if area > max_area {
+                eprintln!(
+                    "New max: ({},{}) to ({},{}): {}×{} = {}",
+                    min_x, min_y, max_x, max_y, width, height, area
+                );
+                max_area = area;
+            }
         }
     }
 
