@@ -1,4 +1,4 @@
-use crate::shared::{parse, Point};
+use crate::shared::{Point, parse};
 
 /// Find the largest rectangle with opposite corners both being red tiles.
 /// Area includes the boundary (inclusive of both endpoints).
@@ -40,7 +40,8 @@ pub fn solve_part1(input: &str) -> u32 {
 mod tests {
     use super::*;
 
-    const EXAMPLE: &str = "7,1
+    const EXAMPLE: &str = "
+7,1
 11,1
 11,7
 9,7
