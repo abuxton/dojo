@@ -17,134 +17,78 @@ The largest rectangle has area **50** (corners at 2,1 and 11,5).
 
 **Question:** What is the largest area of any rectangle you can make?
 
-### Solution
+### Part Two
 
-- Parse input as comma-separated `x,y` coordinates into a `HashSet<Point>`.
-- Try all pairs of points as opposite corners (O(n²) combinations).
-- For each pair, compute axis-aligned rectangle bounds: `(min_x, min_y, max_x, max_y)`.
-- Calculate area inclusively: `(max_x - min_x + 1) × (max_y - min_y + 1)`.
-- Return the maximum area found as `u64` to handle large coordinate values.
+Red tiles are connected in order by straight, axis-aligned green lines (wrapping last to first). All tiles on those lines and all tiles inside the loop are green. Using two red tiles as opposite corners, find the largest rectangle that is fully contained in the red/green region (rectangle corners must be red; all tiles inside must be red or green).
 
-Time complexity: O(n²) where n = number of red tiles.
+**Example:** The largest rectangle using only red/green tiles has area **24** (between 9,5 and 2,3).
 
+## Solution Outline
 
-## Part Two
+- Parse input as comma-separated `x,y` coordinates (ordered).
+- Part 1:
+  - Try all pairs of red tiles as opposite corners.
+  - Area is inclusive: `(max_x - min_x + 1) × (max_y - min_y + 1)`.
+  - Track maximum area (u64).
+- Part 2:
+  - Build the rectilinear polygon from the ordered red tiles (edges between consecutive points, wrapping).
+  - A rectangle is valid if:
+    - Opposite corners are red (given).
+    - The other two corners are inside/on the polygon.
+    - No polygon edge crosses the open interior of the rectangle (axis-aligned crossing check).
+  - Evaluate all pairs of red tiles; keep the maximum inclusive area (u64).
+- Geometry helpers: point-in-polygon (even-odd, boundary-inclusive) for axis-aligned polygons; interior-crossing checks for rectangle vs. polygon edges.
 
-The Elves just remembered: they can only switch out tiles that are red or green. So, your rectangle can only include red or green tiles.
+Time complexity: O(n² · m) worst-case (n red tiles, m edges≈n). Suitable for typical AoC input sizes.
 
-In your list, every red tile is connected to the red tile before and after it by a straight line of green tiles. The list wraps, so the first red tile is also connected to the last red tile. Tiles that are adjacent in your list will always be on either the same row or the same column.
+## Visualization (optional)
 
-Using the same example as before, the tiles marked X would be green:
+A visualization helper can render red tiles (`#`) and an optional rectangle overlay (`O`). In Part 1, you can enable progress visualization:
 
-..............
-.......#XXX#..
-.......X...X..
-..#XXXX#...X..
-..X........X..
-..#XXXXXX#.X..
-.........X.X..
-.........#X#..
-..............
-In addition, all of the tiles inside this loop of red and green tiles are also green. So, in this example, these are the green tiles:
-
-..............
-.......#XXX#..
-.......XXXXX..
-..#XXXX#XXXX..
-..XXXXXXXXXX..
-..#XXXXXX#XX..
-.........XXX..
-.........#X#..
-..............
-The remaining tiles are never red nor green.
-
-The rectangle you choose still must have red tiles in opposite corners, but any other tiles it includes must now be red or green. This significantly limits your options.
-
-For example, you could make a rectangle out of red and green tiles with an area of 15 between 7,3 and 11,1:
-
-..............
-.......OOOOO..
-.......OOOOO..
-..#XXXXOOOOO..
-..XXXXXXXXXX..
-..#XXXXXX#XX..
-.........XXX..
-.........#X#..
-..............
-Or, you could make a thin rectangle with an area of 3 between 9,7 and 9,5:
-
-..............
-.......#XXX#..
-.......XXXXX..
-..#XXXX#XXXX..
-..XXXXXXXXXX..
-..#XXXXXXOXX..
-.........OXX..
-.........OX#..
-..............
-The largest rectangle you can make in this example using only red and green tiles has area 24. One way to do this is between 9,5 and 2,3:
-
-..............
-.......#XXX#..
-.......XXXXX..
-..OOOOOOOOXX..
-..OOOOOOOOXX..
-..OOOOOOOOXX..
-.........XXX..
-.........#X#..
-..............
-
-**Question:** Using two red tiles as opposite corners, what is the largest area of any rectangle you can make using only red and green tiles?
-
-### Visualization
-
-The solution includes optional visualization that shows each new maximum rectangle as it's discovered:
-
-- Displays corner coordinates and dimensions
-- Renders the grid (for grids ≤ 100×100)
-- Red tiles marked as `#`, rectangle overlay marked as `O`
-
-Example output for the largest rectangle (area 50):
-```
-..............
-..OOOOOOOOOO..
-..OOOOOOOOOO..
-..OOOOOOOOOO..
-..OOOOOOOOOO..
-..OOOOOOOOOO..
-..............
-.........#.#..
-..............
-```
+- Use `visualize=true` (stderr) to print each new maximum (only if the grid is ≤ 100×100).
+- Output for the example largest rectangle (area 50):
+  ```
+  ..............
+  ..OOOOOOOOOO..
+  ..OOOOOOOOOO..
+  ..OOOOOOOOOO..
+  ..OOOOOOOOOO..
+  ..OOOOOOOOOO..
+  ..............
+  .........#.#..
+  ..............
+  ```
 
 ## Usage
 
 ```bash
-# Default: input.txt, no visualization
+# Default: part 1, input.txt, no visualization
 cargo run --release
+
+# Part selection: part=1 or part=2
+cargo run --release -- part=2
 
 # Custom input file
 cargo run --release -- input=path/to/input.txt
 
-# Enable visualization (shows progress to stderr)
+# Enable visualization (part 1 only, prints to stderr)
 cargo run --release -- visualize=true
-cargo run --release -- --visualize
-
-# Run tests (includes visualization tests)
-cargo test --release
-
-# Run tests with output
-cargo test --release -- --nocapture
+cargo run --release -- part=1 visualize=true
 ```
 
-The binary prints the Part 1 answer (largest rectangle area as a 64-bit unsigned integer) to stdout. Visualization output goes to stderr.
+## Testing
+
+```bash
+cargo fmt --all
+cargo clippy --all-targets --all-features -- -D warnings
+cargo test --release
+```
 
 ## Notes
 
-- Coordinates can be very large (tested up to ~98,000).
-- Area calculations use `u64` to prevent overflow for large rectangles.
-- The inclusive boundary calculation means a rectangle from (0,0) to (1,1) has area 4, not 1.
-- Visualization automatically skips grids larger than 100×100 to avoid excessive output.
+- Coordinates can be large; areas are computed as `u64`.
+- Inclusive area: rectangle from (0,0) to (1,1) has area 4.
+- Visualization auto-skips grids larger than 100×100.
 
 ## License
 
