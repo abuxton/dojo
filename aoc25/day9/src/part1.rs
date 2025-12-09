@@ -1,6 +1,7 @@
 use crate::shared::{parse, Point};
 
 /// Find the largest rectangle with opposite corners both being red tiles.
+/// Area includes the boundary (inclusive of both endpoints).
 pub fn solve_part1(input: &str) -> u32 {
     let points = parse(input);
 
@@ -23,18 +24,12 @@ pub fn solve_part1(input: &str) -> u32 {
             let min_y = p1.y.min(p2.y);
             let max_y = p1.y.max(p2.y);
 
-            // Calculate area (both p1 and p2 are guaranteed to be red tiles)
-            let width = (max_x - min_x) as u32;
-            let height = (max_y - min_y) as u32;
+            // Calculate area (inclusive of boundaries)
+            let width = (max_x - min_x + 1) as u32;
+            let height = (max_y - min_y + 1) as u32;
             let area = width * height;
 
-            if area > max_area {
-                eprintln!(
-                    "New max: ({},{}) to ({},{}): {}×{} = {}",
-                    min_x, min_y, max_x, max_y, width, height, area
-                );
-                max_area = area;
-            }
+            max_area = max_area.max(area);
         }
     }
 
