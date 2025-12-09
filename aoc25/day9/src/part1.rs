@@ -1,7 +1,6 @@
-use crate::shared::{Point, parse};
-use std::collections::HashSet;
+use crate::shared::{parse, Point};
 
-/// Find the largest rectangle where all corners are red tiles.
+/// Find the largest rectangle with opposite corners both being red tiles.
 pub fn solve_part1(input: &str) -> u32 {
     let points = parse(input);
 
@@ -24,22 +23,12 @@ pub fn solve_part1(input: &str) -> u32 {
             let min_y = p1.y.min(p2.y);
             let max_y = p1.y.max(p2.y);
 
-            // Check if all four corners exist in the point set
-            let tl = Point { x: min_x, y: min_y };
-            let tr = Point { x: max_x, y: min_y };
-            let bl = Point { x: min_x, y: max_y };
-            let br = Point { x: max_x, y: max_y };
+            // Calculate area (both p1 and p2 are guaranteed to be red tiles)
+            let width = (max_x - min_x) as u32;
+            let height = (max_y - min_y) as u32;
+            let area = width * height;
 
-            if points.contains(&tl)
-                && points.contains(&tr)
-                && points.contains(&bl)
-                && points.contains(&br)
-            {
-                let width = (max_x - min_x) as u32;
-                let height = (max_y - min_y) as u32;
-                let area = width * height;
-                max_area = max_area.max(area);
-            }
+            max_area = max_area.max(area);
         }
     }
 
