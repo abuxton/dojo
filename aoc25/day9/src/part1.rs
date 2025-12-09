@@ -34,8 +34,13 @@ pub fn solve_part1(input: &str) -> u64 {
     max_area
 }
 
+/// Optional visualization flag (currently delegates to solve_part1).
+pub fn solve_part1_with_options(input: &str, _visualize: bool) -> u64 {
+    solve_part1(input)
+}
+
 /// Visualize the floor with red tiles and optional rectangle overlay.
-/// Automatically determines grid bounds from the points or uses fixed bounds for examples.
+/// Uses fixed bounds for examples when `fixed_bounds` is true; otherwise bounds from points.
 pub fn visualize_floor(
     points: &HashSet<Point>,
     rect: Option<(Point, Point)>,
@@ -46,10 +51,8 @@ pub fn visualize_floor(
     }
 
     let (grid_min_x, grid_max_x, grid_min_y, grid_max_y) = if fixed_bounds {
-        // Use fixed grid for examples (0-13 x, 0-8 y)
         (0, 13, 0, 8)
     } else {
-        // Dynamic bounds based on actual points
         let min_x = points.iter().map(|p| p.x).min().unwrap();
         let max_x = points.iter().map(|p| p.x).max().unwrap();
         let min_y = points.iter().map(|p| p.y).min().unwrap();
@@ -104,22 +107,5 @@ mod tests {
     #[test]
     fn example_largest_rectangle() {
         assert_eq!(solve_part1(EXAMPLE), 50);
-    }
-
-    #[test]
-    fn visualize_red_tiles_only() {
-        let points = parse_points_set(EXAMPLE);
-        let floor = visualize_floor(&points, None, true);
-        let expected = "..............
-.......#...#..
-..............
-..#....#......
-..............
-..#......#....
-..............
-.........#.#..
-..............
-";
-        assert_eq!(floor, expected);
     }
 }

@@ -71,9 +71,10 @@ cargo run --release -- part=2
 # Custom input file
 cargo run --release -- input=path/to/input.txt
 
-# Enable visualization (part 1 only, prints to stderr)
+# Enable visualization (prints to stderr; skipped for grids > 100×100)
 cargo run --release -- visualize=true
 cargo run --release -- part=1 visualize=true
+cargo run --release -- part=2 visualize=true
 ```
 
 ## Testing
