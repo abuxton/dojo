@@ -36,7 +36,7 @@ rust-check: ## Fast check (compilation check)
 	$(CARGO) check $(CARGO_FLAGS)
 
 # --- test & bench ---
-.PHONY: rust-test rust-test-release rust-bench
+.PHONY: rust-test rust-test-release rust-bench rust-lldb
 rust-test: ## Run unit tests (debug)
 	@echo "cargo test"
 	$(CARGO) test $(CARGO_TEST_FLAGS)
@@ -48,6 +48,11 @@ rust-test-release: ## Run tests with --release
 rust-bench: ## Run benches (requires --bench targets defined)
 	@echo "cargo bench"
 	$(CARGO) bench $(CARGO_FLAGS)
+
+rust-lldb: ## Review run PID with lldb pass grep=<crate name>
+	grep=${grep:=}
+	@echo " lldb -p ${grep} pid"
+	@pgrep ${grep} | xargs -I{} lldb -p {}
 
 # --- linting & formatting ---
 .PHONY: rust-fmt rust-fmt-check rust-clippy
