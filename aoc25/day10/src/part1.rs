@@ -109,7 +109,14 @@ mod tests {
     fn test_simple_machine() {
         let machine = Machine {
             target: vec![false, true, true, false],
-            buttons: vec![vec![3], vec![1, 3], vec![2], vec![2, 3], vec![0, 2], vec![0, 1]],
+            buttons: vec![
+                vec![3],
+                vec![1, 3],
+                vec![2],
+                vec![2, 3],
+                vec![0, 2],
+                vec![0, 1],
+            ],
             joltage: vec![],
         };
 

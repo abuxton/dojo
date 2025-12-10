@@ -24,7 +24,11 @@ pub fn solve_part1(input: &str) -> Result<usize, Box<dyn std::error::Error>> {
                 );
             }
             None => {
-                eprintln!("  Machine {}/{}: No solution found!", idx + 1, total_machines);
+                eprintln!(
+                    "  Machine {}/{}: No solution found!",
+                    idx + 1,
+                    total_machines
+                );
                 return Err("No solution found for a machine".into());
             }
         }
@@ -54,7 +58,11 @@ pub fn solve_part2(input: &str) -> Result<usize, Box<dyn std::error::Error>> {
                 );
             }
             None => {
-                eprintln!("  Machine {}/{}: No solution found!", idx + 1, total_machines);
+                eprintln!(
+                    "  Machine {}/{}: No solution found!",
+                    idx + 1,
+                    total_machines
+                );
                 return Err("No solution found for a machine".into());
             }
         }
