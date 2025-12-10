@@ -1,34 +1,118 @@
-mod parser;
-mod solver;
+use crate::parser::Machine;
 
-pub use parser::Machine;
-pub use solver::solve_machine;
+/// Solve Part 1 using Gaussian elimination over GF(2)
+pub fn solve_machine(machine: &Machine) -> Option<usize> {
+    let n_lights = machine.target.len();
+    let n_buttons = machine.buttons.len();
 
-/// Solve Part 1: sum of minimum button presses for all machines
-pub fn solve_part1(input: &str) -> Result<usize, Box<dyn std::error::Error>> {
-    let machines = parser::parse_input(input)?;
-    let mut total = 0;
+    let mut matrix = vec![vec![false; n_buttons + 1]; n_lights];
 
-    for machine in machines {
-        match solver::solve_machine(&machine) {
-            Some(presses) => total += presses,
-            None => return Err("No solution found for a machine".into()),
+    for (button_idx, button) in machine.buttons.iter().enumerate() {
+        for &light_idx in button {
+            if light_idx < n_lights {
+                matrix[light_idx][button_idx] = true;
+            }
         }
     }
 
-    Ok(total)
+    for (light_idx, &target) in machine.target.iter().enumerate() {
+        matrix[light_idx][n_buttons] = target;
+    }
+
+    gauss_eliminate_and_minimize(&mut matrix, n_buttons)
+}
+
+fn gauss_eliminate_and_minimize(matrix: &mut [Vec<bool>], n_vars: usize) -> Option<usize> {
+    let n_rows = matrix.len();
+    let mut pivot_cols = Vec::new();
+    let mut row_idx = 0;
+
+    for col in 0..n_vars {
+        let mut pivot_row = row_idx;
+        while pivot_row < n_rows && !matrix[pivot_row][col] {
+            pivot_row += 1;
+        }
+
+        if pivot_row == n_rows {
+            continue;
+        }
+
+        matrix.swap(row_idx, pivot_row);
+        pivot_cols.push(col);
+
+        for other_row in 0..n_rows {
+            if other_row != row_idx && matrix[other_row][col] {
+                for c in 0..=n_vars {
+                    matrix[other_row][c] ^= matrix[row_idx][c];
+                }
+            }
+        }
+
+        row_idx += 1;
+    }
+
+    for row in matrix.iter() {
+        let has_var = row[..n_vars].iter().any(|&x| x);
+        let target = row[n_vars];
+        if !has_var && target {
+            return None;
+        }
+    }
+
+    let mut free_vars = Vec::new();
+    for col in 0..n_vars {
+        if !pivot_cols.contains(&col) {
+            free_vars.push(col);
+        }
+    }
+
+    if free_vars.is_empty() {
+        let mut solution = vec![false; n_vars];
+        for (&col, row_idx) in pivot_cols.iter().zip(0..) {
+            solution[col] = matrix[row_idx][n_vars];
+        }
+        return Some(solution.iter().filter(|&&x| x).count());
+    }
+
+    let num_free = free_vars.len();
+    let mut min_presses = usize::MAX;
+
+    for mask in 0..(1 << num_free) {
+        let mut solution = vec![false; n_vars];
+
+        for (i, &free_col) in free_vars.iter().enumerate() {
+            solution[free_col] = (mask & (1 << i)) != 0;
+        }
+
+        for (row_idx, &pivot_col) in pivot_cols.iter().enumerate() {
+            let mut val = matrix[row_idx][n_vars];
+            for col in 0..n_vars {
+                if col != pivot_col && matrix[row_idx][col] && solution[col] {
+                    val ^= true;
+                }
+            }
+            solution[pivot_col] = val;
+        }
+
+        let presses = solution.iter().filter(|&&x| x).count();
+        min_presses = min_presses.min(presses);
+    }
+
+    Some(min_presses)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    const EXAMPLE: &str = "[.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
-[...#.] (0,2,3,4) (2,3) (0,4) (0,1,2) (1,2,3,4) {7,5,12,7,2}
-[.###.#] (0,1,2,3,4) (0,3,4) (0,1,2,4,5) (1,2) {10,11,11,5,10,5}";
-
     #[test]
-    fn test_example() {
-        assert_eq!(solve_part1(EXAMPLE).unwrap(), 7);
+    fn test_simple_machine() {
+        let machine = Machine {
+            target: vec![false, true, true, false],
+            buttons: vec![vec![3], vec![1, 3], vec![2], vec![2, 3], vec![0, 2], vec![0, 1]],
+            joltage: vec![],
+        };
+
+        assert_eq!(solve_machine(&machine), Some(2));
     }
 }

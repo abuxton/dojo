@@ -4,6 +4,7 @@ use std::error::Error;
 pub struct Machine {
     pub target: Vec<bool>,
     pub buttons: Vec<Vec<usize>>,
+    pub joltage: Vec<usize>,
 }
 
 pub fn parse_input(input: &str) -> Result<Vec<Machine>, Box<dyn Error>> {
@@ -21,29 +22,51 @@ fn parse_machine(line: &str) -> Result<Machine, Box<dyn Error>> {
     let target_str = &line[target_start + 1..target_end];
     let target: Vec<bool> = target_str.chars().map(|c| c == '#').collect();
 
-    // Extract buttons from (...)
+    // Find joltage section first
+    let jolt_start = line.find('{').ok_or("Missing { for joltage")?;
+
+    // Extract buttons from (...) between ] and {
     let mut buttons = Vec::new();
     let mut pos = target_end + 1;
 
-    while let Some(start) = line[pos..].find('(') {
-        let start = pos + start;
-        let end = line[start..].find(')').ok_or("Missing ) for button")? + start;
+    while pos < jolt_start {
+        if let Some(start) = line[pos..jolt_start].find('(') {
+            let start = pos + start;
+            let end = line[start..jolt_start]
+                .find(')')
+                .ok_or("Missing ) for button")?
+                + start;
 
-        let button_str = &line[start + 1..end];
-        let indices: Vec<usize> = button_str
-            .split(',')
-            .map(|s| s.trim().parse::<usize>())
-            .collect::<Result<_, _>>()?;
+            let button_str = &line[start + 1..end];
+            let indices: Vec<usize> = button_str
+                .split(',')
+                .map(|s| s.trim().parse::<usize>())
+                .collect::<Result<_, _>>()?;
 
-        buttons.push(indices);
-        pos = end + 1;
+            buttons.push(indices);
+            pos = end + 1;
+        } else {
+            break;
+        }
     }
+
+    // Extract joltage from {...}
+    let jolt_end = line.find('}').ok_or("Missing } for joltage")?;
+    let jolt_str = &line[jolt_start + 1..jolt_end];
+    let joltage: Vec<usize> = jolt_str
+        .split(',')
+        .map(|s| s.trim().parse::<usize>())
+        .collect::<Result<_, _>>()?;
 
     if buttons.is_empty() {
         return Err("No buttons found".into());
     }
 
-    Ok(Machine { target, buttons })
+    Ok(Machine {
+        target,
+        buttons,
+        joltage,
+    })
 }
 
 #[cfg(test)]
@@ -51,7 +74,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_simple() {
+    fn test_parse_with_joltage() {
         let input = "[.##.] (3) (1,3) (2) {3,5,4,7}";
         let machine = parse_machine(input).unwrap();
 
@@ -60,5 +83,6 @@ mod tests {
         assert_eq!(machine.buttons[0], vec![3]);
         assert_eq!(machine.buttons[1], vec![1, 3]);
         assert_eq!(machine.buttons[2], vec![2]);
+        assert_eq!(machine.joltage, vec![3, 5, 4, 7]);
     }
 }
