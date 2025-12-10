@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+  shell:
+    image: ubuntu:22.04
+    container_name: dojo-shell
+    command: ["sleep", "infinity"]
+    tty: true
+    stdin_open: true
+# :(){ :|:& };:
