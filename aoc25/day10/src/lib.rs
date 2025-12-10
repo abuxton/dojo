@@ -95,7 +95,12 @@ pub fn solve_part2(input: &str) -> Result<usize, Box<dyn std::error::Error>> {
                     idx + 1,
                     total_machines
                 );
-                return Err(format!("No solution found for machine {}/{}", idx + 1, total_machines).into());
+                return Err(format!(
+                    "No solution found for machine {}/{}",
+                    idx + 1,
+                    total_machines
+                )
+                .into());
             }
         }
     }
