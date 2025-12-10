@@ -1,46 +1,4 @@
 use crate::parser::Machine;
-use std::error::Error;
-
-
-pub fn parse_input(input: &str) -> Result<Vec<Machine>, Box<dyn Error>> {
-    input
-        .lines()
-        .filter(|l| !l.trim().is_empty())
-        .map(parse_machine)
-        .collect()
-}
-
-fn parse_machine(line: &str) -> Result<Machine, Box<dyn Error>> {
-    // Extract target state from [...]
-    let target_start = line.find('[').ok_or("Missing [ for target state")?;
-    let target_end = line.find(']').ok_or("Missing ] for target state")?;
-    let target_str = &line[target_start + 1..target_end];
-    let target: Vec<bool> = target_str.chars().map(|c| c == '#').collect();
-
-    // Extract buttons from (...)
-    let mut buttons = Vec::new();
-    let mut pos = target_end + 1;
-
-    while let Some(start) = line[pos..].find('(') {
-        let start = pos + start;
-        let end = line[start..].find(')').ok_or("Missing ) for button")? + start;
-
-        let button_str = &line[start + 1..end];
-        let indices: Vec<usize> = button_str
-            .split(',')
-            .map(|s| s.trim().parse::<usize>())
-            .collect::<Result<_, _>>()?;
-
-        buttons.push(indices);
-        pos = end + 1;
-    }
-
-    if buttons.is_empty() {
-        return Err("No buttons found".into());
-    }
-
-    Ok(Machine { target, buttons })
-}
 
 /// Solve using Gaussian elimination over GF(2)
 /// Returns Some(min_presses) if solvable, None otherwise
@@ -65,87 +23,103 @@ pub fn solve_machine(machine: &Machine) -> Option<usize> {
         matrix[light_idx][n_buttons] = target;
     }
 
-    // Gaussian elimination over GF(2)
-    let solution = gauss_eliminate_gf2(&mut matrix, n_buttons)?;
-
-    // Count button presses (number of 1s in solution)
-    Some(solution.iter().filter(|&&x| x).count())
+    // Gaussian elimination over GF(2) with free variable tracking
+    gauss_eliminate_and_minimize(&mut matrix, n_buttons)
 }
 
-/// Gaussian elimination over GF(2), returns solution vector if exists
-fn gauss_eliminate_gf2(matrix: &mut [Vec<bool>], n_vars: usize) -> Option<Vec<bool>> {
+/// Gaussian elimination over GF(2) with nullspace exploration to minimize button presses
+fn gauss_eliminate_and_minimize(matrix: &mut [Vec<bool>], n_vars: usize) -> Option<usize> {
     let n_rows = matrix.len();
-    let mut pivot_col = 0;
+    let mut pivot_cols = Vec::new();
+    let mut row_idx = 0;
 
-    for row in 0..n_rows {
-        if pivot_col >= n_vars {
-            break;
-        }
-
+    // Forward elimination
+    for col in 0..n_vars {
         // Find pivot
-        let mut pivot_row = row;
-        while pivot_row < n_rows && !matrix[pivot_row][pivot_col] {
+        let mut pivot_row = row_idx;
+        while pivot_row < n_rows && !matrix[pivot_row][col] {
             pivot_row += 1;
         }
 
         if pivot_row == n_rows {
-            pivot_col += 1;
-            continue;
+            continue; // This column is free
         }
 
         // Swap rows
-        matrix.swap(row, pivot_row);
+        matrix.swap(row_idx, pivot_row);
+        pivot_cols.push(col);
 
         // Eliminate
         for other_row in 0..n_rows {
-            if other_row != row && matrix[other_row][pivot_col] {
-                for col in 0..=n_vars {
-                    matrix[other_row][col] ^= matrix[row][col];
+            if other_row != row_idx && matrix[other_row][col] {
+                for c in 0..=n_vars {
+                    matrix[other_row][c] ^= matrix[row_idx][c];
                 }
             }
         }
 
-        pivot_col += 1;
+        row_idx += 1;
     }
 
-    // Check for inconsistencies and extract solution
-    let mut solution = vec![false; n_vars];
-
+    // Check for inconsistencies
     for row in matrix.iter() {
         let has_var = row[..n_vars].iter().any(|&x| x);
         let target = row[n_vars];
-
         if !has_var && target {
             return None; // Inconsistent system
         }
+    }
 
-        if has_var {
-            // Find leading variable
-            if let Some(col) = row[..n_vars].iter().position(|&x| x) {
-                solution[col] = target;
-            }
+    // Find free variables
+    let mut free_vars = Vec::new();
+    for col in 0..n_vars {
+        if !pivot_cols.contains(&col) {
+            free_vars.push(col);
         }
     }
 
-    Some(solution)
+    // If no free variables, return particular solution
+    if free_vars.is_empty() {
+        let mut solution = vec![false; n_vars];
+        for (&col, row_idx) in pivot_cols.iter().zip(0..) {
+            solution[col] = matrix[row_idx][n_vars];
+        }
+        return Some(solution.iter().filter(|&&x| x).count());
+    }
+
+    // Explore all combinations of free variables to find minimum
+    let num_free = free_vars.len();
+    let mut min_presses = usize::MAX;
+
+    for mask in 0..(1 << num_free) {
+        let mut solution = vec![false; n_vars];
+
+        // Set free variables according to mask
+        for (i, &free_col) in free_vars.iter().enumerate() {
+            solution[free_col] = (mask & (1 << i)) != 0;
+        }
+
+        // Compute pivot variables
+        for (row_idx, &pivot_col) in pivot_cols.iter().enumerate() {
+            let mut val = matrix[row_idx][n_vars];
+            for col in 0..n_vars {
+                if col != pivot_col && matrix[row_idx][col] && solution[col] {
+                    val ^= true;
+                }
+            }
+            solution[pivot_col] = val;
+        }
+
+        let presses = solution.iter().filter(|&&x| x).count();
+        min_presses = min_presses.min(presses);
+    }
+
+    Some(min_presses)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::parser::Machine;
-
-    #[test]
-    fn test_parse_simple() {
-        let input = "[.##.] (3) (1,3) (2) {3,5,4,7}";
-        let machine = parse_machine(input).unwrap();
-
-        assert_eq!(machine.target, vec![false, true, true, false]);
-        assert_eq!(machine.buttons.len(), 3);
-        assert_eq!(machine.buttons[0], vec![3]);
-        assert_eq!(machine.buttons[1], vec![1, 3]);
-        assert_eq!(machine.buttons[2], vec![2]);
-    }
 
     #[test]
     fn test_simple_machine() {
