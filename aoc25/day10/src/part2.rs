@@ -1,10 +1,12 @@
 // src/part2.rs
 use crate::parser::Machine;
+use std::collections::HashSet;
 use std::time::{Duration, Instant};
 
-const EXHAUSTIVE_TIMEOUT: Duration = Duration::from_secs(2);
+const SOLVER_TIMEOUT: Duration = Duration::from_secs(10);
 
 pub fn solve_machine(machine: &Machine) -> Option<usize> {
+    let start_time = Instant::now();
     let n_counters = machine.joltage.len();
     let n_buttons = machine.buttons.len();
 
@@ -20,170 +22,183 @@ pub fn solve_machine(machine: &Machine) -> Option<usize> {
 
     let target: Vec<i64> = machine.joltage.iter().map(|&x| x as i64).collect();
 
-    // Try strategies and pick the best (minimal) solution
-    let mut best_solution: Option<usize> = None;
-
-    if let Some(result) = solve_direct(&a, &target) {
-        best_solution = Some(result);
-    }
-
-    if let Some(result) = solve_lp_relaxation(&a, &target) {
-        best_solution = match best_solution {
-            Some(prev) => Some(prev.min(result)),
-            None => Some(result),
-        };
-    }
-
-    if let Some(result) = solve_gaussian(&a, &target) {
-        best_solution = match best_solution {
-            Some(prev) => Some(prev.min(result)),
-            None => Some(result),
-        };
-    }
-
-    // Only try exhaustive for very small problems (≤6 buttons, small targets)
-    if best_solution.is_none()
-        && n_buttons <= 6
-        && target.iter().max().unwrap_or(&0) <= &50
-    {
-        let start = Instant::now();
-        if let Some(result) = solve_exhaustive(&a, &target, 100, start) {
-            best_solution = Some(result);
+    // Strategy 1: For very small problems, use exhaustive search
+    if n_buttons <= 8 && target.iter().sum::<i64>() <= 100 {
+        if let Some(result) = solve_branch_and_bound(&a, &target, start_time) {
+            return Some(result);
         }
     }
 
-    best_solution
+    // Strategy 2: Iterative repair with state tracking
+    if start_time.elapsed() < SOLVER_TIMEOUT {
+        if let Some(result) = solve_iterative_repair(&a, &target, start_time) {
+            return Some(result);
+        }
+    }
+
+    // Strategy 3: Multiple random starts
+    for seed in 0..5 {
+        if start_time.elapsed() >= SOLVER_TIMEOUT {
+            break;
+        }
+        if let Some(result) = solve_random_start(&a, &target, seed, start_time) {
+            return Some(result);
+        }
+    }
+
+    None
 }
 
-/// Exhaustive search with pruning and timeout for very small problems
-fn solve_exhaustive(a: &[Vec<i64>], b: &[i64], max_total: i64, start: Instant) -> Option<usize> {
+fn solve_branch_and_bound(a: &[Vec<i64>], b: &[i64], start_time: Instant) -> Option<usize> {
+    if start_time.elapsed() >= SOLVER_TIMEOUT {
+        return None;
+    }
+
     let n_vars = a[0].len();
+    let n_eqs = a.len();
+
+    let max_per_var: Vec<i64> = (0..n_vars)
+        .map(|var_idx| {
+            let mut max_val = b.iter().sum::<i64>();
+            for eq_idx in 0..n_eqs {
+                if a[eq_idx][var_idx] > 0 {
+                    max_val = max_val.min(b[eq_idx]);
+                }
+            }
+            max_val
+        })
+        .collect();
+
     let mut best: Option<i64> = None;
-    let mut solution = vec![0i64; n_vars];
+    let mut current = vec![0i64; n_vars];
 
     fn search(
         a: &[Vec<i64>],
         b: &[i64],
-        solution: &mut Vec<i64>,
+        current: &mut Vec<i64>,
+        max_per_var: &[i64],
         idx: usize,
-        current_total: i64,
+        current_sum: i64,
         best: &mut Option<i64>,
-        max_total: i64,
-        start: Instant,
+        start_time: Instant,
     ) -> bool {
-        // Timeout check
-        if start.elapsed() > EXHAUSTIVE_TIMEOUT {
+        if start_time.elapsed() >= SOLVER_TIMEOUT {
             return false;
         }
 
-        let n_vars = solution.len();
+        let n_vars = current.len();
         let n_eqs = a.len();
 
-        // Prune if we've exceeded best or max
         if let Some(best_val) = best {
-            if current_total >= *best_val {
+            if current_sum >= *best_val {
                 return true;
             }
         }
-        if current_total > max_total {
-            return true;
-        }
 
         if idx == n_vars {
-            // Check if valid
-            for i in 0..n_eqs {
-                let sum: i64 = (0..n_vars).map(|j| a[i][j] * solution[j]).sum();
-                if sum != b[i] {
+            for eq_idx in 0..n_eqs {
+                let sum: i64 = (0..n_vars).map(|j| a[eq_idx][j] * current[j]).sum();
+                if sum != b[eq_idx] {
                     return true;
                 }
             }
-            // Valid solution found
-            *best = Some(current_total);
+            *best = Some(current_sum);
             return true;
         }
 
-        // Calculate upper bound for this variable
-        let mut max_val = max_total - current_total;
-        for i in 0..n_eqs {
-            if a[i][idx] > 0 {
-                let sum_so_far: i64 = (0..idx).map(|j| a[i][j] * solution[j]).sum();
-                let remaining = b[i] - sum_so_far;
-                if remaining < 0 {
-                    return true;
-                }
-                if remaining >= 0 {
-                    max_val = max_val.min(remaining);
+        let mut min_val = 0i64;
+        let mut max_val = max_per_var[idx];
+
+        for eq_idx in 0..n_eqs {
+            if a[eq_idx][idx] > 0 {
+                let sum_so_far: i64 = (0..idx).map(|j| a[eq_idx][j] * current[j]).sum();
+                let remaining = b[eq_idx] - sum_so_far;
+                max_val = max_val.min(remaining);
+
+                let sum_remaining_vars: i64 = ((idx + 1)..n_vars)
+                    .map(|j| if a[eq_idx][j] > 0 { max_per_var[j] } else { 0 })
+                    .sum();
+
+                if remaining > sum_remaining_vars {
+                    min_val = min_val.max(remaining - sum_remaining_vars);
                 }
             }
         }
 
-        // Try values (limit iterations)
-        for val in 0..=max_val.min(50) {
-            solution[idx] = val;
+        if min_val > max_val {
+            return true;
+        }
 
-            // Early feasibility check
+        for val in min_val..=max_val {
+            current[idx] = val;
+
             let mut feasible = true;
-            for i in 0..n_eqs {
-                let sum: i64 = (0..=idx).map(|j| a[i][j] * solution[j]).sum();
-                if sum > b[i] {
+            for eq_idx in 0..n_eqs {
+                let sum: i64 = (0..=idx).map(|j| a[eq_idx][j] * current[j]).sum();
+                if sum > b[eq_idx] {
                     feasible = false;
                     break;
                 }
             }
 
-            if !feasible {
-                solution[idx] = 0;
-                continue;
-            }
-
-            if !search(a, b, solution, idx + 1, current_total + val, best, max_total, start) {
-                return false; // Timeout
+            if feasible
+                && !search(
+                    a,
+                    b,
+                    current,
+                    max_per_var,
+                    idx + 1,
+                    current_sum + val,
+                    best,
+                    start_time,
+                )
+            {
+                return false;
             }
         }
-        solution[idx] = 0;
+
+        current[idx] = 0;
         true
     }
 
-    if search(a, b, &mut solution, 0, 0, &mut best, max_total, start) {
+    if search(a, b, &mut current, &max_per_var, 0, 0, &mut best, start_time) {
         best.map(|x| x as usize)
     } else {
-        None // Timeout
+        None
     }
 }
 
-fn solve_direct(a: &[Vec<i64>], b: &[i64]) -> Option<usize> {
+/// Iterative repair with cycle detection
+fn solve_iterative_repair(a: &[Vec<i64>], b: &[i64], start_time: Instant) -> Option<usize> {
     let n_vars = a[0].len();
     let n_eqs = a.len();
     let mut solution = vec![0i64; n_vars];
 
-    // For each counter, find buttons that affect ONLY that counter
+    // Initialize with upper bound estimate
     for eq_idx in 0..n_eqs {
-        let target_val = b[eq_idx];
-        let mut buttons_for_this: Vec<usize> = Vec::new();
+        let target = b[eq_idx];
+        let affecting: Vec<usize> = (0..n_vars).filter(|&i| a[eq_idx][i] > 0).collect();
 
-        for var_idx in 0..n_vars {
-            if a[eq_idx][var_idx] > 0 {
-                let mut affects_others = false;
-                for other_eq in 0..n_eqs {
-                    if other_eq != eq_idx && a[other_eq][var_idx] > 0 {
-                        affects_others = true;
-                        break;
-                    }
-                }
-                if !affects_others {
-                    buttons_for_this.push(var_idx);
-                }
+        if !affecting.is_empty() {
+            for &var_idx in &affecting {
+                solution[var_idx] = solution[var_idx].max(target);
             }
-        }
-
-        if !buttons_for_this.is_empty() {
-            let button = buttons_for_this[0];
-            solution[button] = target_val;
         }
     }
 
-    // Verify and adjust
+    // Track visited states to detect cycles
+    let mut seen_states: HashSet<Vec<i64>> = HashSet::new();
+
     for _ in 0..1000 {
+        if start_time.elapsed() >= SOLVER_TIMEOUT {
+            return None;
+        }
+
+        // Check if we've seen this state before (cycle detection)
+        if !seen_states.insert(solution.clone()) {
+            return None; // Cycle detected
+        }
+
         let mut all_satisfied = true;
 
         for eq_idx in 0..n_eqs {
@@ -193,20 +208,53 @@ fn solve_direct(a: &[Vec<i64>], b: &[i64]) -> Option<usize> {
             if diff != 0 {
                 all_satisfied = false;
 
-                for var_idx in 0..n_vars {
-                    if a[eq_idx][var_idx] > 0 {
-                        if diff > 0 {
-                            solution[var_idx] += diff;
-                        } else if solution[var_idx] >= -diff {
-                            solution[var_idx] += diff;
-                        }
-                        break;
+                // Find buttons affecting this equation, sorted by total coverage
+                let mut buttons_with_coverage: Vec<(usize, usize)> = (0..n_vars)
+                    .filter(|&i| a[eq_idx][i] > 0)
+                    .map(|i| {
+                        let coverage = (0..n_eqs).filter(|&e| a[e][i] > 0).count();
+                        (i, coverage)
+                    })
+                    .collect();
+
+                // Sort by coverage (prefer buttons that affect fewer equations)
+                buttons_with_coverage.sort_by_key(|x| x.1);
+
+                if let Some(&(var_idx, _)) = buttons_with_coverage.first() {
+                    if diff > 0 {
+                        solution[var_idx] += diff;
+                    } else if solution[var_idx] >= diff.abs() {
+                        solution[var_idx] -= diff.abs();
+                    } else if solution[var_idx] > 0 {
+                        // Can't fix entirely with this button, reduce what we can
+                        solution[var_idx] = 0;
                     }
                 }
             }
         }
 
         if all_satisfied {
+            // Try to optimize
+            for var_idx in 0..n_vars {
+                while solution[var_idx] > 0 {
+                    solution[var_idx] -= 1;
+
+                    let mut valid = true;
+                    for eq_idx in 0..n_eqs {
+                        let sum: i64 = (0..n_vars).map(|j| a[eq_idx][j] * solution[j]).sum();
+                        if sum != b[eq_idx] {
+                            valid = false;
+                            break;
+                        }
+                    }
+
+                    if !valid {
+                        solution[var_idx] += 1;
+                        break;
+                    }
+                }
+            }
+
             return Some(solution.iter().sum::<i64>() as usize);
         }
     }
@@ -214,85 +262,90 @@ fn solve_direct(a: &[Vec<i64>], b: &[i64]) -> Option<usize> {
     None
 }
 
-fn solve_lp_relaxation(a: &[Vec<i64>], b: &[i64]) -> Option<usize> {
+/// Try different random starting points
+fn solve_random_start(
+    a: &[Vec<i64>],
+    b: &[i64],
+    seed: usize,
+    start_time: Instant,
+) -> Option<usize> {
     let n_vars = a[0].len();
     let n_eqs = a.len();
+    let mut solution = vec![0i64; n_vars];
 
-    let af: Vec<Vec<f64>> = a
-        .iter()
-        .map(|row| row.iter().map(|&x| x as f64).collect())
-        .collect();
-    let bf: Vec<f64> = b.iter().map(|&x| x as f64).collect();
-
-    let mut solution_f = vec![0.0; n_vars];
-
-    let mut var_utility: Vec<(usize, usize)> = Vec::new();
-    for var_idx in 0..n_vars {
-        let mut count = 0;
-        for eq_idx in 0..n_eqs {
-            if af[eq_idx][var_idx] > 0.0 {
-                count += 1;
-            }
+    // Different initialization strategies based on seed
+    match seed {
+        0 => {
+            // Start from zero
         }
-        var_utility.push((var_idx, count));
-    }
-
-    var_utility.sort_by(|a, b| b.1.cmp(&a.1));
-
-    for eq_idx in 0..n_eqs {
-        let current_sum: f64 = (0..n_vars).map(|j| af[eq_idx][j] * solution_f[j]).sum();
-        let diff = bf[eq_idx] - current_sum;
-
-        if diff > 0.0 {
-            for &(var_idx, _) in &var_utility {
-                if af[eq_idx][var_idx] > 0.0 {
-                    solution_f[var_idx] += diff / af[eq_idx][var_idx];
-                    break;
-                }
-            }
+        1 => {
+            // Start with equal distribution
+            let total: i64 = b.iter().sum();
+            let per_var = total / n_vars as i64;
+            solution = vec![per_var; n_vars];
         }
-    }
-
-    let mut solution: Vec<i64> = solution_f.iter().map(|&x| x.ceil() as i64).collect();
-
-    // Refine with optimization: try to reduce each variable
-    for _ in 0..1000 {
-        let mut improved = false;
-
-        // Try reducing each variable
-        for var_idx in 0..n_vars {
-            if solution[var_idx] > 0 {
-                solution[var_idx] -= 1;
-
-                // Check if still valid
-                let mut valid = true;
-                for eq_idx in 0..n_eqs {
-                    let sum: i64 = (0..n_vars).map(|j| a[eq_idx][j] * solution[j]).sum();
-                    if sum < b[eq_idx] {
-                        valid = false;
-                        break;
+        2 => {
+            // Start with equation targets
+            for eq_idx in 0..n_eqs {
+                let affecting: Vec<usize> =
+                    (0..n_vars).filter(|&i| a[eq_idx][i] > 0).collect();
+                if !affecting.is_empty() {
+                    let per_button = b[eq_idx] / affecting.len() as i64;
+                    for &var_idx in &affecting {
+                        solution[var_idx] = solution[var_idx].max(per_button);
                     }
                 }
-
-                if !valid {
-                    solution[var_idx] += 1; // Restore
+            }
+        }
+        3 => {
+            // Start with dedicated buttons
+            for eq_idx in 0..n_eqs {
+                for var_idx in 0..n_vars {
+                    if a[eq_idx][var_idx] > 0 {
+                        let other_eqs = (0..n_eqs)
+                            .filter(|&e| e != eq_idx && a[e][var_idx] > 0)
+                            .count();
+                        if other_eqs == 0 {
+                            solution[var_idx] = b[eq_idx];
+                            break;
+                        }
+                    }
                 }
             }
         }
+        _ => {
+            // Reverse order processing
+            for eq_idx in (0..n_eqs).rev() {
+                let affecting: Vec<usize> =
+                    (0..n_vars).filter(|&i| a[eq_idx][i] > 0).collect();
+                if !affecting.is_empty() {
+                    solution[affecting[0]] = b[eq_idx];
+                }
+            }
+        }
+    }
 
-        // Fix any deficits
+    // Now repair
+    for _ in 0..500 {
+        if start_time.elapsed() >= SOLVER_TIMEOUT {
+            return None;
+        }
+
+        let mut changed = false;
+
         for eq_idx in 0..n_eqs {
             let sum: i64 = (0..n_vars).map(|j| a[eq_idx][j] * solution[j]).sum();
             let diff = b[eq_idx] - sum;
 
             if diff != 0 {
-                improved = true;
+                changed = true;
+
                 for var_idx in 0..n_vars {
                     if a[eq_idx][var_idx] > 0 {
                         if diff > 0 {
-                            solution[var_idx] += 1;
-                        } else if solution[var_idx] > 0 {
-                            solution[var_idx] -= 1;
+                            solution[var_idx] += diff;
+                        } else if solution[var_idx] >= diff.abs() {
+                            solution[var_idx] -= diff.abs();
                         }
                         break;
                     }
@@ -300,129 +353,25 @@ fn solve_lp_relaxation(a: &[Vec<i64>], b: &[i64]) -> Option<usize> {
             }
         }
 
-        if !improved {
+        if !changed {
+            // Verify
+            let mut valid = true;
+            for eq_idx in 0..n_eqs {
+                let sum: i64 = (0..n_vars).map(|j| a[eq_idx][j] * solution[j]).sum();
+                if sum != b[eq_idx] {
+                    valid = false;
+                    break;
+                }
+            }
+
+            if valid {
+                return Some(solution.iter().sum::<i64>() as usize);
+            }
             break;
         }
     }
 
-    // Final verification
-    for eq_idx in 0..n_eqs {
-        let sum: i64 = (0..n_vars).map(|j| a[eq_idx][j] * solution[j]).sum();
-        if sum != b[eq_idx] {
-            return None;
-        }
-    }
-
-    Some(solution.iter().sum::<i64>() as usize)
-}
-
-fn solve_gaussian(a: &[Vec<i64>], b: &[i64]) -> Option<usize> {
-    let n_vars = a[0].len();
-    let n_eqs = a.len();
-
-    let mut aug: Vec<Vec<f64>> = Vec::new();
-    for i in 0..n_eqs {
-        let mut row = Vec::new();
-        for j in 0..n_vars {
-            row.push(a[i][j] as f64);
-        }
-        row.push(b[i] as f64);
-        aug.push(row);
-    }
-
-    for col in 0..n_vars.min(n_eqs) {
-        let mut max_row = col;
-        for row in col..n_eqs {
-            if aug[row][col].abs() > aug[max_row][col].abs() {
-                max_row = row;
-            }
-        }
-
-        if aug[max_row][col].abs() < 1e-10 {
-            continue;
-        }
-
-        aug.swap(col, max_row);
-
-        for row in col + 1..n_eqs {
-            let factor = aug[row][col] / aug[col][col];
-            for c in col..=n_vars {
-                aug[row][c] -= factor * aug[col][c];
-            }
-        }
-    }
-
-    let mut solution = vec![0.0; n_vars];
-    for i in (0..n_eqs.min(n_vars)).rev() {
-        let mut sum = aug[i][n_vars];
-        for j in i + 1..n_vars {
-            sum -= aug[i][j] * solution[j];
-        }
-        if aug[i][i].abs() > 1e-10 {
-            solution[i] = (sum / aug[i][i]).max(0.0);
-        }
-    }
-
-    let mut int_solution: Vec<i64> = solution.iter().map(|&x| x.round() as i64).collect();
-
-    // Refine with optimization
-    for _ in 0..1000 {
-        let mut improved = false;
-
-        // Try reducing variables
-        for var_idx in 0..n_vars {
-            if int_solution[var_idx] > 0 {
-                int_solution[var_idx] -= 1;
-
-                let mut valid = true;
-                for eq_idx in 0..n_eqs {
-                    let sum: i64 = (0..n_vars).map(|j| a[eq_idx][j] * int_solution[j]).sum();
-                    if sum < b[eq_idx] {
-                        valid = false;
-                        break;
-                    }
-                }
-
-                if !valid {
-                    int_solution[var_idx] += 1;
-                }
-            }
-        }
-
-        // Fix deficits
-        for eq_idx in 0..n_eqs {
-            let sum: i64 = (0..n_vars).map(|j| a[eq_idx][j] * int_solution[j]).sum();
-            let diff = b[eq_idx] - sum;
-
-            if diff != 0 {
-                improved = true;
-                for var_idx in 0..n_vars {
-                    if a[eq_idx][var_idx] > 0 {
-                        if diff > 0 {
-                            int_solution[var_idx] += 1;
-                        } else if int_solution[var_idx] > 0 {
-                            int_solution[var_idx] -= 1;
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-
-        if !improved {
-            break;
-        }
-    }
-
-    // Final verification
-    for eq_idx in 0..n_eqs {
-        let sum: i64 = (0..n_vars).map(|j| a[eq_idx][j] * int_solution[j]).sum();
-        if sum != b[eq_idx] {
-            return None;
-        }
-    }
-
-    Some(int_solution.iter().sum::<i64>() as usize)
+    None
 }
 
 #[cfg(test)]
