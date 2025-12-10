@@ -44,31 +44,68 @@ pub fn solve_part2(input: &str) -> Result<usize, Box<dyn std::error::Error>> {
     let mut total = 0;
 
     eprintln!("Part 2: Processing {} machines...", total_machines);
+    eprintln!("Progress: [--------------------] 0%");
+
+    let start_time = std::time::Instant::now();
 
     for (idx, machine) in machines.iter().enumerate() {
+        let machine_start = std::time::Instant::now();
+
+        eprint!("\r  Machine {}/{}: Solving...", idx + 1, total_machines);
+        std::io::Write::flush(&mut std::io::stderr()).ok();
+
         match part2::solve_machine(machine) {
             Some(presses) => {
                 total += presses;
+                let elapsed = machine_start.elapsed();
+                let total_elapsed = start_time.elapsed();
+                let avg_time = total_elapsed.as_secs_f64() / (idx + 1) as f64;
+                let remaining = ((total_machines - idx - 1) as f64 * avg_time) as u64;
+
                 eprintln!(
-                    "  Machine {}/{}: {} presses (running total: {})",
+                    "\r  Machine {}/{}: {} presses in {:.2}s (total: {}, ETA: {}s)      ",
                     idx + 1,
                     total_machines,
                     presses,
-                    total
+                    elapsed.as_secs_f64(),
+                    total,
+                    remaining
                 );
+
+                // Update progress bar
+                let progress = ((idx + 1) as f64 / total_machines as f64 * 100.0) as usize;
+                let filled = progress / 5;
+                let empty = 20 - filled;
+                eprint!(
+                    "Progress: [{}{}] {}%",
+                    "=".repeat(filled),
+                    "-".repeat(empty),
+                    progress
+                );
+                if idx + 1 < total_machines {
+                    eprint!("\r");
+                } else {
+                    eprintln!();
+                }
+                std::io::Write::flush(&mut std::io::stderr()).ok();
             }
             None => {
                 eprintln!(
-                    "  Machine {}/{}: No solution found!",
+                    "\r  Machine {}/{}: No solution found!                              ",
                     idx + 1,
                     total_machines
                 );
-                return Err("No solution found for a machine".into());
+                return Err(format!("No solution found for machine {}/{}", idx + 1, total_machines).into());
             }
         }
     }
 
-    eprintln!("Part 2 complete: {} total presses", total);
+    let total_time = start_time.elapsed();
+    eprintln!(
+        "\nPart 2 complete: {} total presses in {:.2}s",
+        total,
+        total_time.as_secs_f64()
+    );
     Ok(total)
 }
 
