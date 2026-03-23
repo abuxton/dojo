@@ -1,0 +1,115 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+#
+# NomadOS Learning Environment - Multi-Node Cluster
+#
+# This compose file spins up a three-node Nomad cluster:
+#   - nomad-server: the Nomad control plane
+#   - nomad-client-1, nomad-client-2: NomadOS-style agent nodes
+#
+# Each client node mirrors the behaviour of a NomadOS booted machine:
+# Nomad is the primary process, accepting jobs from the server.
+#
+# Usage:
+#   docker compose up -d
+#   docker compose logs -f
+#   docker compose down
+#
+# Access the Nomad UI at: http://localhost:4646
+
+services:
+  nomad-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nomad-server
+    hostname: nomad-server
+    environment:
+      NOMAD_MODE: server
+      NOMAD_CONFIG_DIR: /etc/nomad.d
+      NOMAD_NODE_NAME: nomad-server
+    volumes:
+      - ./config/nomad-server.hcl:/etc/nomad.d/nomad.hcl:ro
+      - nomad-server-data:/var/lib/nomad
+      - nomad-server-logs:/var/log/nomad
+    ports:
+      - "4646:4646"   # HTTP API & UI
+      - "4647:4647"   # RPC
+      - "4648:4648"   # Serf WAN
+    networks:
+      nomados-net:
+        ipv4_address: 172.20.0.10
+    # Nomad needs elevated privileges for cgroup management and raw_exec driver
+    privileged: true
+    cgroupns: host
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:4646/v1/status/leader"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  nomad-client-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nomad-client-1
+    hostname: nomados-node-1
+    environment:
+      NOMAD_MODE: client
+      NOMAD_CONFIG_DIR: /etc/nomad.d
+      NOMAD_NODE_NAME: nomados-node-1
+    volumes:
+      - ./config/nomad-client.hcl:/etc/nomad.d/nomad.hcl:ro
+      - nomad-client-1-data:/var/lib/nomad
+      - nomad-client-1-logs:/var/log/nomad
+    networks:
+      nomados-net:
+        ipv4_address: 172.20.0.11
+    # NomadOS clients need privilege for raw_exec driver and cgroup access
+    privileged: true
+    cgroupns: host
+    depends_on:
+      nomad-server:
+        condition: service_healthy
+    restart: unless-stopped
+
+  nomad-client-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nomad-client-2
+    hostname: nomados-node-2
+    environment:
+      NOMAD_MODE: client
+      NOMAD_CONFIG_DIR: /etc/nomad.d
+      NOMAD_NODE_NAME: nomados-node-2
+    volumes:
+      - ./config/nomad-client.hcl:/etc/nomad.d/nomad.hcl:ro
+      - nomad-client-2-data:/var/lib/nomad
+      - nomad-client-2-logs:/var/log/nomad
+    networks:
+      nomados-net:
+        ipv4_address: 172.20.0.12
+    privileged: true
+    cgroupns: host
+    depends_on:
+      nomad-server:
+        condition: service_healthy
+    restart: unless-stopped
+
+networks:
+  nomados-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+
+volumes:
+  nomad-server-data:
+  nomad-server-logs:
+  nomad-client-1-data:
+  nomad-client-1-logs:
+  nomad-client-2-data:
+  nomad-client-2-logs:
