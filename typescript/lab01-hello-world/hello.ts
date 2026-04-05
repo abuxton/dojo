@@ -1,5 +1,5 @@
 // Lab 01 — Hello World
-// Run: npx ts-node hello.ts
+// Run: npx ts-node lab01-hello-world/hello.ts
 
 const message: string = "Hello, TypeScript!";
 console.log(message);
