@@ -30,7 +30,7 @@ npx ts-node lab01-hello-world/hello.ts
 **Expected output:**
 ```
 Hello, TypeScript!
-Welcome to TypeScript in 2025!
+Welcome to TypeScript in <current year>!
 ```
 
 ### 3 — Open the file and experiment
