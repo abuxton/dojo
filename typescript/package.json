@@ -1,0 +1,22 @@
+{
+  "name": "typescript-dojo",
+  "version": "1.0.0",
+  "description": "TypeScript learning dojo — from Hello World to a web server",
+  "scripts": {
+    "lab01": "npx ts-node lab01-hello-world/hello.ts",
+    "lab02": "npx ts-node lab02-types-variables/types.ts",
+    "lab03": "npx ts-node lab03-functions/functions.ts",
+    "lab04": "npx ts-node lab04-loops-arrays/loops.ts",
+    "lab05": "npx ts-node lab05-interfaces-objects/interfaces.ts",
+    "lab06": "npx ts-node lab06-web-server/server.ts"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.0"
+  },
+  "dependencies": {
+    "express": "^5.0.1"
+  }
+}
