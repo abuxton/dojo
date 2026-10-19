@@ -11,7 +11,7 @@ so the collection has predictable sample data.
 
 ```sh
 npm run lesson:01
-npm run lab:05:export
+npm run lab:06:export
 ```
 
 The output is deliberately ignored by Git:

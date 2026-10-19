@@ -69,15 +69,16 @@ are the primary references for concepts that need more depth.
 
 ## Guided course
 
-Open [Lesson 0001: From app data to a MongoDB document](lessons/0001-documents-collections-crud.html)
-for a short, interactive introduction tied to Lab 01. The course mission,
-curated sources, reference material, and future learning records live in
+Open the [guided course](lessons/index.html) for nine short, interactive
+lessons tied to the runnable labs. Use `npm run <script>` for every command in
+this project—`npx run` does not run package scripts. The course mission,
+curated sources, reference material, and learning records live in
 `MISSION.md`, `RESOURCES.md`, `reference/`, and `learning-records/`.
 
 ## Local client tools
 
 `mongosh`, `mongoexport`, and `mongodump` run in the Compose `tools` service,
-so Docker is the only requirement for Labs 04 and 05. The service uses the
+so Docker is the only requirement for Labs 05, 06, and 09. The service uses the
 internal Docker connection `mongodb://mongodb:27017/mongodb_learning`, while
 the Node.js lessons, MCP server, and Compass use the forwarded host port.
 

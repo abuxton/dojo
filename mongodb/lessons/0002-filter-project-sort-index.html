@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lesson 0002: Filter, project, sort, and index</title>
+    <link rel="stylesheet" href="../assets/course.css">
+    <script src="../assets/quiz.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Lesson 0002 · 10 minutes</p>
+      <h1>Ask for only the books you need</h1>
+      <p class="lede">Lab 02 turns a collection into a useful application query:
+        filter the candidates, project the useful fields, then sort them.</p>
+      <div class="card"><pre>books.find(
+  { category: "database", price: { $lte: 30 }, inStock: true },
+  { projection: { _id: 0, title: 1, price: 1 } },
+).sort({ price: 1 })</pre></div>
+      <p>A <strong>filter</strong> chooses matching documents. A
+        <strong>projection</strong> limits returned fields. A <strong>sort</strong>
+        orders the matches. The compound index on <code>category</code> and
+        <code>price</code> is a structure the server can use to find a subset
+        efficiently.</p>
+      <p class="source">Source: <a href="https://www.mongodb.com/docs/drivers/node/current/crud/query/retrieve/">Node.js Driver: Retrieve Data</a>.</p>
+      <div class="practice"><p>Predict which titles cost at most 30, then run:</p>
+        <pre>npm run lesson:02</pre>
+        <p>Change only <code>$lte: 30</code> to <code>$lte: 25</code>, run it
+          again, and explain the difference.</p></div>
+      <fieldset class="quiz" data-quiz data-success="Correct. The projection decides returned fields." data-retry="Try again: filtering chooses documents; projection chooses fields.">
+        <legend>Which query part hides <code>_id</code> from the result?</legend>
+        <div class="choices">
+          <label><input type="radio" name="q2" value="incorrect"> the filter</label>
+          <label><input type="radio" name="q2" value="incorrect"> the sort</label>
+          <label><input type="radio" name="q2" value="incorrect"> the index</label>
+          <label><input type="radio" name="q2" value="correct"> the projection</label>
+        </div>
+        <button type="button">Check answer</button><p class="feedback" aria-live="polite"></p>
+      </fieldset>
+      <footer><a href="0001-documents-collections-crud.html">Previous</a> · <a href="0003-aggregation-pipeline.html">Next: aggregation</a> · Ask your teacher about the index before changing it.</footer>
+    </main>
+  </body>
+</html>

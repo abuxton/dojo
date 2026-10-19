@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Lesson 0003: Aggregation pipelines</title><link rel="stylesheet" href="../assets/course.css"><script src="../assets/quiz.js" defer></script></head>
+  <body><main>
+    <p class="eyebrow">Lesson 0003 · 10 minutes</p><h1>Turn order items into sales totals</h1>
+    <p class="lede">An aggregation pipeline passes documents through ordered stages. Lab 03 turns nested order items into one sales row per product.</p>
+    <div class="card"><pre>$unwind items → $group by product → $project fields → $sort revenue</pre>
+      <p><code>$unwind</code> makes one pipeline document per array item.
+        <code>$group</code> combines those documents by a key. Later stages receive
+        the output from earlier ones.</p></div>
+    <p class="source">Source: <a href="https://www.mongodb.com/docs/manual/aggregation/">MongoDB Manual: Aggregation</a>.</p>
+    <div class="practice"><p>Predict the top product by revenue, then run:</p><pre>npm run lesson:03</pre>
+      <p>Trace Notebook through the pipeline: it appears in two orders, then the
+        group stage totals its quantity and revenue.</p></div>
+    <fieldset class="quiz" data-quiz data-success="Correct. $unwind turns array items into pipeline documents." data-retry="Review the first stage: it deconstructs the items array.">
+      <legend>Which stage handles the nested <code>items</code> array first?</legend><div class="choices">
+        <label><input type="radio" name="q3" value="correct"> the unwind</label>
+        <label><input type="radio" name="q3" value="incorrect"> the group</label>
+        <label><input type="radio" name="q3" value="incorrect"> the project</label>
+        <label><input type="radio" name="q3" value="incorrect"> the sort</label>
+      </div><button type="button">Check answer</button><p class="feedback" aria-live="polite"></p></fieldset>
+    <footer><a href="0002-filter-project-sort-index.html">Previous</a> · <a href="0004-client-connection.html">Next: client configuration</a> · Ask your teacher to sketch a pipeline for a question you have.</footer>
+  </main></body>
+</html>
