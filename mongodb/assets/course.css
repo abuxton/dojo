@@ -72,6 +72,45 @@ h2 {
   padding: 1.25rem;
 }
 
+.lesson-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  margin: 1.5rem 0;
+}
+
+.lesson-card {
+  background: rgb(255 255 255 / 0.72);
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+.lesson-card h2 {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.lesson-card p {
+  color: var(--muted);
+  margin: 0.55rem 0;
+}
+
+.lesson-card pre {
+  font-size: 0.78rem;
+  margin: auto 0 0;
+}
+
+.lesson-card .label {
+  color: var(--leaf);
+  font-size: 0.75rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .model {
   display: grid;
   gap: 0.75rem;

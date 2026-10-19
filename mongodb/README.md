@@ -50,17 +50,17 @@ modify the learning database.
 
 ## Learning path
 
-| Lesson | Concepts | Command |
-| --- | --- | --- |
-| 1 | Collections, documents, insert, find, update, delete | `npm run lesson:01` |
-| 2 | Filters, projections, sorting, indexes, bulk updates | `npm run lesson:02` |
-| 3 | Embedded arrays, `$unwind`, `$group`, `$project` | `npm run lesson:03` |
-| 4 | Node.js client options, app name, timeout, and ping | `npm run lab:04:client` |
-| 5 | Interactive shell queries with `mongosh` | `npm run lab:05:mongosh` |
-| 6 | JSON exports and BSON backups with Database Tools | `npm run lab:06:export` |
-| 7 | Visual document, index, and aggregation exploration in Compass | `npm run lab:07:compass` |
-| 8 | PyMongo equivalents of the Node.js driver labs | `npm run lab:08:python` |
-| 9 | Read-only shell automation and JSON output | `npm run lab:09:shell` |
+| Lesson | Concepts | Visual preview | Command |
+| --- | --- | --- | --- |
+| 1 | Collections and CRUD | `insertMany()` → `updateOne()` → `deleteOne()` | `npm run lesson:01` |
+| 2 | Querying and indexes | `find(filter, projection).sort()` | `npm run lesson:02` |
+| 3 | Aggregation | `$unwind` → `$group` → `$project` → `$sort` | `npm run lesson:03` |
+| 4 | Node.js client configuration | `new MongoClient(uri, options)` → `ping` | `npm run lab:04:client` |
+| 5 | Interactive shell queries | `db.collection.find(filter)` | `npm run lab:05:mongosh` |
+| 6 | Database Tools | `mongoexport` (JSON) + `mongodump` (BSON) | `npm run lab:06:export` |
+| 7 | Compass exploration | connect → inspect documents, indexes, pipeline | `npm run lab:07:compass` |
+| 8 | PyMongo | `collection.update_one(filter, update)` | `npm run lab:08:python` |
+| 9 | Shell automation | `mongosh --quiet --eval` → JSON | `npm run lab:09:shell` |
 
 Read a lesson before running it, change one query at a time, predict its
 result, then run it again. The [MongoDB Manual](https://www.mongodb.com/docs/manual/)
