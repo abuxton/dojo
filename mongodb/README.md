@@ -28,6 +28,13 @@ export MONGODB_DB="mongodb_learning"
 Stop the local database with `npm run db:down`. Its Docker volume persists
 between restarts; use Docker directly if you deliberately want to remove it.
 
+## Kubernetes quickstart
+
+The [Kubernetes quickstart](kubernetes/README.md) deploys MongoDB Controllers
+for Kubernetes and Ops Manager to Rancher Desktop. Run `npm run k8s:guide` for
+an interactive do-nothing operator guide, or `npm run k8s:deploy` after
+exporting the required credentials.
+
 ## Use the MongoDB MCP server
 
 `mcp.json` configures MongoDB's official local MCP server for this learning

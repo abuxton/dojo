@@ -17,7 +17,9 @@
     "lab:08:python:setup": "python3 -m venv .venv && .venv/bin/python -m pip install --requirement python/requirements.txt",
     "lab:08:python": "./python/run-labs.sh",
     "lab:09:shell": "./scripts/09-shell-automation.sh",
-    "check": "node --check lessons/01-crud.mjs && node --check lessons/02-query-and-index.mjs && node --check lessons/03-aggregation.mjs && node --check lessons/04-client-configuration.mjs && python3 -m py_compile python/mongodb_learning/db.py python/lessons/01_crud.py python/lessons/02_query_and_index.py python/lessons/03_aggregation.py python/lessons/04_client_configuration.py && sh -n scripts/mongodb-tools-env.sh scripts/run-mongosh-lab.sh scripts/export-lab-data.sh scripts/open-compass.sh scripts/09-shell-automation.sh python/run-labs.sh"
+    "k8s:deploy": "./scripts/deploy-kubernetes-quickstart.sh",
+    "k8s:guide": "./scripts/deploy-kubernetes-quickstart-guide.sh",
+    "check": "node --check lessons/01-crud.mjs && node --check lessons/02-query-and-index.mjs && node --check lessons/03-aggregation.mjs && node --check lessons/04-client-configuration.mjs && python3 -m py_compile python/mongodb_learning/db.py python/lessons/01_crud.py python/lessons/02_query_and_index.py python/lessons/03_aggregation.py python/lessons/04_client_configuration.py && sh -n scripts/mongodb-tools-env.sh scripts/run-mongosh-lab.sh scripts/export-lab-data.sh scripts/open-compass.sh scripts/09-shell-automation.sh python/run-labs.sh && bash -n scripts/deploy-kubernetes-quickstart.sh scripts/deploy-kubernetes-quickstart-guide.sh"
   },
   "dependencies": {
     "mongodb": "^7.7.0"
