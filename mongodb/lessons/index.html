@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MongoDB Learning Lab course</title>
+    <link rel="stylesheet" href="../assets/course.css">
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Guided course</p>
+      <h1>MongoDB Learning Lab</h1>
+      <p class="lede">Nine short lessons tied to the scripts in this repository.
+        Each card previews the operation you will run.</p>
+      <div class="lesson-grid">
+        <article class="lesson-card"><span class="label">Lesson 01</span><h2><a href="0001-documents-collections-crud.html">Documents and CRUD</a></h2><p>Create, read, update, then delete student documents.</p><pre>insertMany([...])
+updateOne(...)
+deleteOne(...)</pre></article>
+        <article class="lesson-card"><span class="label">Lesson 02</span><h2><a href="0002-filter-project-sort-index.html">Query and index</a></h2><p>Return affordable books with only the fields you need.</p><pre>find(filter, projection)
+.sort({ price: 1 })</pre></article>
+        <article class="lesson-card"><span class="label">Lesson 03</span><h2><a href="0003-aggregation-pipeline.html">Aggregation</a></h2><p>Turn nested order items into product sales totals.</p><pre>$unwind → $group
+→ $project → $sort</pre></article>
+        <article class="lesson-card"><span class="label">Lab 04</span><h2><a href="0004-client-connection.html">Client connection</a></h2><p>Identify the local client and check its connection.</p><pre>new MongoClient(uri,
+  { appName, timeout })</pre></article>
+        <article class="lesson-card"><span class="label">Lab 05</span><h2><a href="0005-mongosh-query.html">mongosh</a></h2><p>Run the student query outside application code.</p><pre>db.students.find(
+  { completedLessons: { $gte: 2 } })</pre></article>
+        <article class="lesson-card"><span class="label">Lab 06</span><h2><a href="0006-backup-export.html">Export and backup</a></h2><p>Produce readable JSON and a restorable BSON dump.</p><pre>mongoexport
+mongodump</pre></article>
+        <article class="lesson-card"><span class="label">Lab 07</span><h2><a href="0007-compass-inspect.html">Compass</a></h2><p>Browse collections, indexes, and the aggregation visually.</p><pre>mongodb://127.0.0.1
+:27017/mongodb_learning</pre></article>
+        <article class="lesson-card"><span class="label">Lab 08</span><h2><a href="0008-python-driver.html">PyMongo</a></h2><p>Repeat the driver operations from Python.</p><pre>students.update_one(
+  filter, update)</pre></article>
+        <article class="lesson-card"><span class="label">Lab 09</span><h2><a href="0009-shell-automation.html">Shell automation</a></h2><p>Emit a read-only query result as JSON.</p><pre>mongosh --quiet --eval
+JSON.stringify(...)</pre></article>
+      </div>
+      <footer>Run project commands with <code>npm run …</code>, not <code>npx run …</code>.</footer>
+    </main>
+  </body>
+</html>

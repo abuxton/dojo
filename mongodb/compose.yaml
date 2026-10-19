@@ -1,0 +1,29 @@
+services:
+  mongodb:
+    image: mongo:8
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-learning-data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok'"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  tools:
+    image: mongo:8
+    profiles: ["tools"]
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      MONGODB_CONNECTION_STRING: mongodb://mongodb:27017/mongodb_learning
+    volumes:
+      - ./:/workspace:ro
+      - ./.mongodb-learning-artifacts:/artifacts
+    working_dir: /workspace
+    entrypoint: []
+
+volumes:
+  mongodb-learning-data:

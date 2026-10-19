@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Lesson 0008: PyMongo driver</title><link rel="stylesheet" href="../assets/course.css"><script src="../assets/quiz.js" defer></script></head>
+  <body><main>
+    <p class="eyebrow">Lesson 0008 · 10 minutes</p><h1>Keep the database concept, change the language</h1>
+    <p class="lede">The Python lab repeats CRUD, querying, aggregation, and
+      client configuration with PyMongo. The methods look different, but the
+      documents and query language are the same.</p>
+    <div class="card"><pre>students.update_one(
+  {"name": "Ada"},
+  {"$inc": {"completedLessons": 1}},
+)</pre><p>PyMongo uses synchronous method calls such as
+      <code>find_one</code> and <code>update_one</code>. It writes to its own
+      <code>lesson_08_python_*</code> collections, preserving the Node.js data.</p></div>
+    <p class="source">Source: <a href="https://pymongo.readthedocs.io/en/stable/">PyMongo Documentation</a>.</p>
+    <div class="practice"><pre>npm run lab:08:python:setup
+npm run lab:08:python</pre><p>Compare the Python CRUD script to Lab 01. Identify
+      one method whose name changes and one MongoDB operator that does not.</p></div>
+    <fieldset class="quiz" data-quiz data-success="Correct. The driver language changes; the MongoDB document model does not." data-retry="Try again: PyMongo uses the same MongoDB server and query operators.">
+      <legend>What stays the same between Node.js and PyMongo?</legend><div class="choices">
+        <label><input type="radio" name="q8" value="incorrect"> the syntax</label>
+        <label><input type="radio" name="q8" value="incorrect"> the runtime</label>
+        <label><input type="radio" name="q8" value="correct"> the model</label>
+        <label><input type="radio" name="q8" value="incorrect"> the package</label>
+      </div><button type="button">Check answer</button><p class="feedback" aria-live="polite"></p></fieldset>
+    <footer><a href="0007-compass-inspect.html">Previous</a> · <a href="0009-shell-automation.html">Next: shell automation</a> · Ask your teacher to translate a Node.js operation to PyMongo.</footer>
+  </main></body>
+</html>

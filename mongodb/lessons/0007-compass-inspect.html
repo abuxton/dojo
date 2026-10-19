@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Lesson 0007: Compass inspection</title><link rel="stylesheet" href="../assets/course.css"><script src="../assets/quiz.js" defer></script></head>
+  <body><main>
+    <p class="eyebrow">Lesson 0007 · 10 minutes</p><h1>Make the database visible</h1>
+    <p class="lede">Compass is the local desktop client for inspecting the same
+      collections that the drivers and shell use. It does not create a second
+      database or copy your lesson data.</p>
+    <div class="card"><pre>mongodb://127.0.0.1:27017/mongodb_learning</pre>
+      <p>The launcher passes this host connection string to Compass. Save it as
+        <strong>MongoDB Learning Lab</strong>, then browse documents, indexes, and
+        aggregation stages.</p></div>
+    <p class="source">Source: <a href="https://www.mongodb.com/docs/compass/">MongoDB Compass Documentation</a>.</p>
+    <div class="practice"><pre>npm run lesson:01
+npm run lesson:02
+npm run lesson:03
+npm run lab:07:compass</pre><p>Find the compound book index, then rebuild the
+      order aggregation with the Aggregations tab.</p></div>
+    <fieldset class="quiz" data-quiz data-success="Correct. Compass is the visual desktop client." data-retry="Try again: Compass inspects the local deployment; it is not a new database.">
+      <legend>Which tool provides the visual database interface?</legend><div class="choices">
+        <label><input type="radio" name="q7" value="correct"> Compass app</label>
+        <label><input type="radio" name="q7" value="incorrect"> the driver</label>
+        <label><input type="radio" name="q7" value="incorrect"> the shell</label>
+        <label><input type="radio" name="q7" value="incorrect"> the export</label>
+      </div><button type="button">Check answer</button><p class="feedback" aria-live="polite"></p></fieldset>
+    <footer><a href="0006-backup-export.html">Previous</a> · <a href="0008-python-driver.html">Next: Python</a> · Ask your teacher to compare Compass with mongosh.</footer>
+  </main></body>
+</html>
