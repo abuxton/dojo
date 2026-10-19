@@ -51,6 +51,15 @@ wait_for_ops_manager() {
       return
     fi
 
+    if [[ "$application_database_phase" == "Failed" ||
+      "$ops_manager_phase" == "Failed" ]]; then
+      printf 'Ops Manager failed to become ready (application database: %s, Ops Manager: %s).\n' \
+        "${application_database_phase:-Pending}" \
+        "${ops_manager_phase:-Pending}" >&2
+      kubectl_in_namespace describe opsmanager ops-manager >&2
+      exit 1
+    fi
+
     printf 'Waiting for Ops Manager (application database: %s, Ops Manager: %s)...\n' \
       "${application_database_phase:-Pending}" \
       "${ops_manager_phase:-Pending}"
