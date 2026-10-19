@@ -1,0 +1,25 @@
+{
+  "name": "mongodb-learning",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hands-on MongoDB lessons using the official Node.js driver",
+  "type": "module",
+  "scripts": {
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "lesson:01": "node lessons/01-crud.mjs",
+    "lesson:02": "node lessons/02-query-and-index.mjs",
+    "lesson:03": "node lessons/03-aggregation.mjs",
+    "lab:04:client": "node lessons/04-client-configuration.mjs",
+    "lab:05:mongosh": "./scripts/run-mongosh-lab.sh",
+    "lab:06:export": "./scripts/export-lab-data.sh",
+    "lab:07:compass": "./scripts/open-compass.sh",
+    "lab:08:python:setup": "python3 -m venv .venv && .venv/bin/python -m pip install --requirement python/requirements.txt",
+    "lab:08:python": "./python/run-labs.sh",
+    "lab:09:shell": "./scripts/09-shell-automation.sh",
+    "check": "node --check lessons/01-crud.mjs && node --check lessons/02-query-and-index.mjs && node --check lessons/03-aggregation.mjs && node --check lessons/04-client-configuration.mjs && python3 -m py_compile python/mongodb_learning/db.py python/lessons/01_crud.py python/lessons/02_query_and_index.py python/lessons/03_aggregation.py python/lessons/04_client_configuration.py && sh -n scripts/mongodb-tools-env.sh scripts/run-mongosh-lab.sh scripts/export-lab-data.sh scripts/open-compass.sh scripts/09-shell-automation.sh python/run-labs.sh"
+  },
+  "dependencies": {
+    "mongodb": "^7.7.0"
+  }
+}
