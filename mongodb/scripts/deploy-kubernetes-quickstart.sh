@@ -38,11 +38,11 @@ wait_for_ops_manager() {
 
   while (( SECONDS < deadline )); do
     application_database_phase=$(
-      kubectl_in_namespace get mongodbopsmanager ops-manager \
+      kubectl_in_namespace get opsmanager ops-manager \
         --output=jsonpath='{.status.applicationDatabase.phase}'
     )
     ops_manager_phase=$(
-      kubectl_in_namespace get mongodbopsmanager ops-manager \
+      kubectl_in_namespace get opsmanager ops-manager \
         --output=jsonpath='{.status.opsManager.phase}'
     )
 
@@ -59,7 +59,7 @@ wait_for_ops_manager() {
 
   printf 'Ops Manager did not become ready within %s seconds.\n' \
     "$OPS_MANAGER_TIMEOUT_SECONDS" >&2
-  kubectl_in_namespace describe mongodbopsmanager ops-manager >&2
+  kubectl_in_namespace describe opsmanager ops-manager >&2
   exit 1
 }
 
@@ -90,7 +90,7 @@ deploy_ops_manager() {
 
   wait_for_ops_manager
   printf 'Ops Manager URL: '
-  kubectl_in_namespace get mongodbopsmanager ops-manager \
+  kubectl_in_namespace get opsmanager ops-manager \
     --output=jsonpath='{.status.opsManager.url}'
   printf '\n'
 }
