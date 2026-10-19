@@ -60,3 +60,16 @@ KUBE_CONTEXT=rancher-desktop ./scripts/deploy-kubernetes-quickstart.sh
 The script accepts `KUBE_NAMESPACE`, `HELM_RELEASE`, and
 `OPS_MANAGER_TIMEOUT_SECONDS` when a non-default namespace, Helm release, or
 readiness timeout is needed.
+
+## Teardown
+
+To delete the local quickstart, including the MongoDB namespace, administrator
+credentials, and application-database persistent-volume claims, run:
+
+```sh
+npm run k8s:teardown
+```
+
+The command requires typing `DELETE` before it changes the cluster.
+Rancher Desktop's `local-path` storage class uses the `Delete` reclaim policy,
+so it also removes the claims' backing local volumes.

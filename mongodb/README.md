@@ -33,7 +33,8 @@ between restarts; use Docker directly if you deliberately want to remove it.
 The [Kubernetes quickstart](kubernetes/README.md) deploys MongoDB Controllers
 for Kubernetes and Ops Manager to Rancher Desktop. Run `npm run k8s:guide` for
 an interactive do-nothing operator guide, or `npm run k8s:deploy` after
-exporting the required credentials.
+exporting the required credentials. Run `npm run k8s:teardown` to remove the
+quickstart and its local persistent data.
 
 ## Use the MongoDB MCP server
 
