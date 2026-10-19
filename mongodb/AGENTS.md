@@ -62,6 +62,9 @@ framework abstractions.
 - Teaching lessons are numbered HTML files in `lessons/`; reuse
   `assets/course.css` and `assets/quiz.js`, keep each lesson short, and link
   it to the mission, a primary source in `RESOURCES.md`, and a runnable lab.
+- The teaching workspace is stateful: use `MISSION.md` to select the next
+  lesson, add a numbered record only after demonstrated understanding, and
+  add newly understood terms to `GLOSSARY.md`.
 - Place reusable connection code in `src/db.mjs` and standalone exercises in
   `lessons/<number>-<topic>.mjs`. Add a matching `lesson:<number>` npm script,
   README learning-path row, and syntax-check entry for each lesson.
