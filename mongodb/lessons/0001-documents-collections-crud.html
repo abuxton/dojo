@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lesson 0001: From app data to a MongoDB document</title>
+    <link rel="stylesheet" href="../assets/course.css">
+    <script src="../assets/quiz.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Lesson 0001 · 10 minutes</p>
+      <h1>From app data to a MongoDB document</h1>
+      <p class="lede">Your local app needs somewhere to keep a student's name,
+        learning track, and completed lessons. In MongoDB, that one student is a
+        <strong>document</strong>.</p>
+
+      <div class="model" aria-label="MongoDB hierarchy">
+        <div><strong>Database</strong><span><code>mongodb_learning</code></span></div>
+        <div><strong>Collection</strong><span><code>lesson_01_students</code></span></div>
+        <div><strong>Document</strong><span><code>{ name: "Ada", ... }</code></span></div>
+      </div>
+
+      <p>A document is a set of field-and-value pairs. A collection holds
+        documents of a similar application concern; a database groups collections.
+        MongoDB's official manual describes documents as JSON-like values that can
+        also contain nested documents and arrays.</p>
+      <p class="source">Source: <a href="https://www.mongodb.com/docs/manual/introduction/">MongoDB Manual: Introduction</a>.</p>
+
+      <h2>Read the existing lab as an app story</h2>
+      <div class="card">
+        <pre>await students.insertMany([
+  { name: "Ada", track: "database-basics", completedLessons: 1 },
+  { name: "Grace", track: "database-basics", completedLessons: 2 }
+]);</pre>
+        <p><code>students</code> is the collection. Each object is a document.
+          MongoDB creates a unique <code>_id</code> when the driver inserts a
+          document without one.</p>
+      </div>
+      <p class="source">Source: <a href="https://www.mongodb.com/docs/drivers/node/current/crud/insert/">MongoDB Node.js Driver: Insert Documents</a>.</p>
+
+      <h2>Try it in your local lab</h2>
+      <div class="practice">
+        <p>Before running anything, predict: after the script deletes Linus, how
+          many student documents remain?</p>
+        <pre>npm run db:up
+npm run lesson:01</pre>
+        <p>Then inspect the same collection visually with
+          <code>npm run lab:07:compass</code>, or use the reference
+          <a href="../reference/mongodb-local-lab-map.html">local lab map</a>.</p>
+      </div>
+
+      <h2>Retrieval check</h2>
+      <fieldset class="quiz" data-quiz
+        data-success="Correct. Ada's field-value pairs make one document."
+        data-retry="Not quite. Return to the hierarchy, then try again.">
+        <legend>Where do Ada's name, track, and completedLessons fields live?</legend>
+        <div class="choices">
+          <label><input type="radio" name="q1" value="incorrect"> one collection</label>
+          <label><input type="radio" name="q1" value="correct"> one document</label>
+          <label><input type="radio" name="q1" value="incorrect"> one database</label>
+          <label><input type="radio" name="q1" value="incorrect"> one index entry</label>
+        </div>
+        <button type="button">Check answer</button>
+        <p class="feedback" aria-live="polite"></p>
+      </fieldset>
+
+      <fieldset class="quiz" data-quiz
+        data-success="Correct. The collection groups related student documents."
+        data-retry="Not quite. A collection contains documents; it is inside a database.">
+        <legend>Which container groups the student documents?</legend>
+        <div class="choices">
+          <label><input type="radio" name="q2" value="incorrect"> a document</label>
+          <label><input type="radio" name="q2" value="incorrect"> an index entry</label>
+          <label><input type="radio" name="q2" value="correct"> a collection</label>
+          <label><input type="radio" name="q2" value="incorrect"> a database</label>
+        </div>
+        <button type="button">Check answer</button>
+        <p class="feedback" aria-live="polite"></p>
+      </fieldset>
+
+      <h2>One sentence to keep</h2>
+      <p>A <strong>document</strong> stores one application's data item, a
+        <strong>collection</strong> groups related documents, and a
+        <strong>database</strong> groups collections.</p>
+
+      <footer>
+        Next: ask your teacher to explain a line from <code>lessons/01-crud.mjs</code>
+        or request the next lesson on finding and updating documents.
+      </footer>
+    </main>
+  </body>
+</html>

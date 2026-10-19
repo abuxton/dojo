@@ -59,6 +59,9 @@ framework abstractions.
   `python/mongodb_learning/db.py` and exercises in `python/lessons/`.
   Python exercises must use their own `lesson_08_python_*` collections so
   they remain repeatable without resetting Node.js data.
+- Teaching lessons are numbered HTML files in `lessons/`; reuse
+  `assets/course.css` and `assets/quiz.js`, keep each lesson short, and link
+  it to the mission, a primary source in `RESOURCES.md`, and a runnable lab.
 - Place reusable connection code in `src/db.mjs` and standalone exercises in
   `lessons/<number>-<topic>.mjs`. Add a matching `lesson:<number>` npm script,
   README learning-path row, and syntax-check entry for each lesson.

@@ -67,6 +67,13 @@ result, then run it again. The [MongoDB Manual](https://www.mongodb.com/docs/man
 and [Node.js driver documentation](https://www.mongodb.com/docs/drivers/node/current/)
 are the primary references for concepts that need more depth.
 
+## Guided course
+
+Open [Lesson 0001: From app data to a MongoDB document](lessons/0001-documents-collections-crud.html)
+for a short, interactive introduction tied to Lab 01. The course mission,
+curated sources, reference material, and future learning records live in
+`MISSION.md`, `RESOURCES.md`, `reference/`, and `learning-records/`.
+
 ## Local client tools
 
 `mongosh`, `mongoexport`, and `mongodump` run in the Compose `tools` service,
