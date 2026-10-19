@@ -31,6 +31,7 @@ cp .env.example .env
 #    APP_KEY  – any random string of ≥ 16 characters
 #             (tip: openssl rand -hex 16)
 #    URL      – leave as http://localhost:8080 for local use
+#    NOMAD_PLATFORM – set to linux/arm64 (default) or linux/amd64
 #    DB_PASSWORD / MYSQL_PASSWORD – matching passwords for the database
 #    MYSQL_ROOT_PASSWORD – root password for the MySQL container
 
@@ -45,6 +46,15 @@ open http://localhost:8080
 ```
 
 The first launch may take a minute or two while MySQL initialises and the admin container runs its database migrations.
+
+## Platform support
+
+This compose stack defaults to `linux/arm64` for all services.
+
+- Use `NOMAD_PLATFORM=linux/arm64` for ARM64 hosts (Raspberry Pi 4/5, Ampere, Apple Silicon Linux VMs).
+- Use `NOMAD_PLATFORM=linux/amd64` if you need to force x86_64 images.
+
+Set this value in `.env` before running `docker compose up -d`.
 
 ## Useful commands
 
