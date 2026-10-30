@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MongoDB local lab map</title>
+    <link rel="stylesheet" href="../assets/course.css">
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Quick reference</p>
+      <h1>Local lab map</h1>
+      <p class="lede">Use this when you need to decide where data lives and which
+        repository command lets you inspect it.</p>
+
+      <div class="model" aria-label="MongoDB hierarchy">
+        <div><strong>Database</strong><span><code>mongodb_learning</code></span></div>
+        <div><strong>Collection</strong><span><code>lesson_01_students</code></span></div>
+        <div><strong>Document</strong><span><code>{ name: "Ada", ... }</code></span></div>
+      </div>
+
+      <h2>Local connection</h2>
+      <pre>mongodb://127.0.0.1:27017/mongodb_learning</pre>
+
+      <h2>Choose a tool</h2>
+      <div class="card">
+        <p><strong>Node.js or Python driver:</strong> application code and repeatable lessons.</p>
+        <p><strong>mongosh:</strong> an interactive or scripted query.</p>
+        <p><strong>Compass:</strong> visual inspection of documents, indexes, and pipelines.</p>
+        <p><strong>MCP:</strong> read-only AI-assisted exploration.</p>
+      </div>
+
+      <h2>Safety boundary</h2>
+      <p>Lessons reset only their own <code>lesson_*</code> collections. Keep the
+        database name beginning with <code>mongodb_learning</code>.</p>
+
+      <footer>
+        Sources:
+        <a href="https://www.mongodb.com/docs/manual/introduction/">MongoDB Manual</a>
+        · <a href="../lessons/0001-documents-collections-crud.html">Lesson 0001</a>
+      </footer>
+    </main>
+  </body>
+</html>

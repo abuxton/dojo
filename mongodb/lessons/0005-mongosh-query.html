@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Lesson 0005: mongosh queries</title><link rel="stylesheet" href="../assets/course.css"><script src="../assets/quiz.js" defer></script></head>
+  <body><main>
+    <p class="eyebrow">Lesson 0005 · 8 minutes</p><h1>Query without changing app code</h1>
+    <p class="lede">Lab 05 runs <code>mongosh</code> from the Docker tools service,
+      then asks the same question as a driver query: which students completed two
+      or more lessons?</p>
+    <div class="card"><pre>db.lesson_01_students.find(
+  { completedLessons: { $gte: 2 } },
+  { _id: 0, name: 1, track: 1, completedLessons: 1 },
+).sort({ name: 1 })</pre></div>
+    <p><code>mongosh</code> is useful for inspecting a database interactively or
+      running a small script. It uses the same query language as the driver, but
+      it is not your application's runtime.</p>
+    <p class="source">Source: <a href="https://www.mongodb.com/docs/mongodb-shell/">MongoDB Shell Documentation</a>.</p>
+    <div class="practice"><pre>npm run lesson:01
+npm run lab:05:mongosh</pre><p>Compare the result to the end of Lab 01.</p></div>
+    <fieldset class="quiz" data-quiz data-success="Correct. mongosh is the interactive shell client." data-retry="Try again: this lab runs the shell from the Compose tools service.">
+      <legend>Which tool runs the interactive query here?</legend><div class="choices">
+        <label><input type="radio" name="q5" value="incorrect"> the driver</label>
+        <label><input type="radio" name="q5" value="correct"> the shell</label>
+        <label><input type="radio" name="q5" value="incorrect"> Compass app</label>
+        <label><input type="radio" name="q5" value="incorrect"> the index</label>
+      </div><button type="button">Check answer</button><p class="feedback" aria-live="polite"></p></fieldset>
+    <footer><a href="0004-client-connection.html">Previous</a> · <a href="0006-backup-export.html">Next: exports</a> · Ask your teacher to translate a driver query into shell syntax.</footer>
+  </main></body>
+</html>

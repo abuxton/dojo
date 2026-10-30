@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Lesson 0011: MongoDB MCP Server</title><link rel="stylesheet" href="../assets/course.css"><script src="../assets/quiz.js" defer></script></head>
+  <body><main>
+    <p class="eyebrow">Lesson 0011 · 8 minutes</p><h1>Let an AI client inspect, not change</h1>
+    <p class="lede">The MongoDB MCP Server lets an AI client use MongoDB context
+      and tools. This course connects it only to the local
+      <code>mongodb_learning</code> database and keeps the server read-only.</p>
+    <div class="card"><pre>{
+  "args": ["-y", "mongodb-mcp-server@latest", "--readOnly"],
+  "env": {
+    "MDB_MCP_CONNECTION_STRING":
+      "mongodb://127.0.0.1:27017/mongodb_learning"
+  }
+}</pre><p><code>mcp.json</code> contains this configuration. <code>--readOnly</code>
+      is the important boundary: the agent can inspect the seeded lesson data
+      but cannot modify it through this server.</p></div>
+    <p>The official MCP Server supports local self-hosted and Atlas Managed
+      deployments. This lesson uses the local option because the course already
+      runs a local MongoDB container; it is not an Atlas administration setup.</p>
+    <p class="source">Primary source: <a href="https://www.mongodb.com/docs/mcp-server/overview/">MongoDB MCP Server Overview</a>. Configuration details: <a href="https://www.mongodb.com/docs/mcp-server/local-mcp/configuration/options/">Local MCP options</a>.</p>
+    <div class="practice"><pre>npm run db:up
+copilot --additional-mcp-config @mcp.json</pre><p>Run Lesson 01 first if you need
+      sample data. Then ask the AI client to list the available collections or
+      describe a lesson collection. Verify that the request is inspect-only;
+      do not remove <code>--readOnly</code>.</p></div>
+    <fieldset class="quiz" data-quiz data-success="Correct. Read-only mode lets the agent inspect lesson data without modifying it." data-retry="Try again: this course keeps the MCP server limited to inspection of the local learning database.">
+      <legend>Which setting preserves the lesson-data safety boundary?</legend><div class="choices">
+        <label><input type="radio" name="q11" value="incorrect"> write access</label>
+        <label><input type="radio" name="q11" value="correct"> read-only mode</label>
+        <label><input type="radio" name="q11" value="incorrect"> Atlas cluster</label>
+        <label><input type="radio" name="q11" value="incorrect"> shell script</label>
+      </div><button type="button">Check answer</button><p class="feedback" aria-live="polite"></p></fieldset>
+    <footer><a href="0010-mongodb-agent-skills.html">Previous</a> · <a href="index.html">Course index</a> · Ask your teacher to help turn a question into a safe, read-only request.</footer>
+  </main></body>
+</html>

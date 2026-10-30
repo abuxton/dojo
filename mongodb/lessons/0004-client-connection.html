@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Lesson 0004: Client configuration</title><link rel="stylesheet" href="../assets/course.css"><script src="../assets/quiz.js" defer></script></head>
+  <body><main>
+    <p class="eyebrow">Lesson 0004 · 8 minutes</p><h1>Make a connection explain itself</h1>
+    <p class="lede">The local client reads its URI, database, app name, and timeout
+      from configuration, then pings MongoDB before it does application work.</p>
+    <div class="card"><pre>new MongoClient(uri, {
+  appName,
+  serverSelectionTimeoutMS,
+})</pre>
+      <p><code>appName</code> identifies the client in server metadata.
+        <code>serverSelectionTimeoutMS</code> bounds how long the driver waits to
+        choose a server. This lab uses a short local-development timeout, not a
+        universal production recommendation.</p></div>
+    <p class="source">Source: <a href="https://www.mongodb.com/docs/drivers/node/current/connect/connection-options/">Node.js Driver: Connection Options</a>.</p>
+    <div class="practice"><p>Run the configuration check:</p><pre>npm run lab:04:client</pre>
+      <p>Then set <code>MONGODB_APP_NAME</code> in your shell, rerun it, and
+        confirm the printed value changed.</p></div>
+    <fieldset class="quiz" data-quiz data-success="Correct. appName identifies the connecting client." data-retry="Try again: the URI finds MongoDB; the app name labels the client.">
+      <legend>Which option labels the client in server metadata?</legend><div class="choices">
+        <label><input type="radio" name="q4" value="incorrect"> the database</label>
+        <label><input type="radio" name="q4" value="incorrect"> the timeout</label>
+        <label><input type="radio" name="q4" value="correct"> the app name</label>
+        <label><input type="radio" name="q4" value="incorrect"> the collection</label>
+      </div><button type="button">Check answer</button><p class="feedback" aria-live="polite"></p></fieldset>
+    <footer><a href="0003-aggregation-pipeline.html">Previous</a> · <a href="0005-mongosh-query.html">Next: mongosh</a> · Ask your teacher before choosing production pool settings.</footer>
+  </main></body>
+</html>

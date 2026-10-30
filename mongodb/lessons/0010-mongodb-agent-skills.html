@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Lesson 0010: MongoDB agent skills</title><link rel="stylesheet" href="../assets/course.css"><script src="../assets/quiz.js" defer></script></head>
+  <body><main>
+    <p class="eyebrow">Lesson 0010 · 12 minutes</p><h1>Give an agent the right playbook</h1>
+    <p class="lede">A MongoDB agent skill is focused instruction for an agent, not
+      a connection to your database. Choose the skill that matches the task
+      before asking the agent to act.</p>
+    <div class="model"><div><strong>Task</strong><span>Ask a plain-language question about lesson data.</span></div><div><strong>Skill</strong><span>Use <code>mongodb-natural-language-querying</code>.</span></div><div><strong>Tool</strong><span>Use MCP only when the agent needs database context.</span></div></div>
+    <p>The official <a href="https://github.com/mongodb/agent-skills">MongoDB
+      agent-skills repository</a> includes focused skills for connection setup,
+      natural-language querying, schema design, query optimization, Search and
+      AI, Atlas Stream Processing, and Queryable Encryption sizing. A skill
+      narrows the agent's workflow; it does not itself configure an MCP server.</p>
+    <h2>Choose the skill for the job</h2>
+    <div class="card">
+      <p><a href="https://github.com/mongodb/agent-skills/tree/main/skills/mongodb-mcp-setup"><code>mongodb-mcp-setup</code></a>:
+        configure or troubleshoot an MCP server, its connection string, or required
+        environment variables. Do not select it for an ordinary query when
+        <code>mcp.json</code> already works.</p>
+      <p><a href="https://github.com/mongodb/agent-skills/tree/main/skills/mongodb-connection"><code>mongodb-connection</code></a>:
+        change <code>MongoClient</code> settings, connection pools, or timeouts, or
+        diagnose a connection failure.</p>
+      <p><a href="https://github.com/mongodb/agent-skills/tree/main/skills/mongodb-natural-language-querying"><code>mongodb-natural-language-querying</code></a>:
+        turn a learner's question into a read-only <code>find</code> query or
+        aggregation. Inspect schema and sample documents through MCP first.</p>
+      <p><a href="https://github.com/mongodb/agent-skills/tree/main/skills/mongodb-query-optimizer"><code>mongodb-query-optimizer</code></a>:
+        investigate a slow query, an explain plan, or an index choice. It is not
+        needed for a first-pass query tutorial.</p>
+      <p><a href="https://github.com/mongodb/agent-skills/tree/main/skills/mongodb-schema-design"><code>mongodb-schema-design</code></a>:
+        evaluate a data model, embedding versus references, JSON Schema
+        validation, or data lifecycle decisions.</p>
+      <p><a href="https://github.com/mongodb/agent-skills/tree/main/skills/mongodb-search-and-ai"><code>mongodb-search-and-ai</code></a>:
+        work with Atlas Search, Vector Search, embeddings, RAG, or relevance.
+        It needs an Atlas-capable deployment, not this local container alone.</p>
+      <p><a href="https://github.com/mongodb/agent-skills/tree/main/skills/mongodb-atlas-stream-processing"><code>mongodb-atlas-stream-processing</code></a>:
+        build or operate an Atlas Stream Processing workflow. Use it only for an
+        explicit stream-processing exercise.</p>
+      <p><a href="https://github.com/mongodb/agent-skills/tree/main/skills/mongodb-qe-size-estimation"><code>mongodb-qe-size-estimation</code></a>:
+        estimate the storage impact of Queryable Encryption. Use it only for an
+        explicit Queryable Encryption sizing exercise.</p>
+    </div>
+    <p class="source">Primary source: <a href="https://github.com/mongodb/agent-skills">MongoDB Agent Skills</a>. See the <a href="../reference/mongodb-mcp-server-and-agent-skills-research.md">research note</a> for installation paths and the full skill list.</p>
+    <div class="practice"><pre>npm run db:up
+copilot --additional-mcp-config @mcp.json</pre><p>In the resulting Copilot session, ask: “Use
+      <code>mongodb-natural-language-querying</code> to propose a read-only
+      query for students who completed at least two lessons.” Before accepting
+      the query, identify the skill, its purpose, and whether it needs MCP
+      database context.</p></div>
+    <fieldset class="quiz" data-quiz data-success="Correct. The skill supplies task-specific instructions; the MCP server supplies database tools." data-retry="Try again: a skill guides the agent's workflow, while MCP can provide the database context and tools.">
+      <legend>What should guide an agent's query-writing workflow?</legend><div class="choices">
+        <label><input type="radio" name="q10" value="correct"> skill instructions</label>
+        <label><input type="radio" name="q10" value="incorrect"> server tools</label>
+        <label><input type="radio" name="q10" value="incorrect"> data documents</label>
+        <label><input type="radio" name="q10" value="incorrect"> client settings</label>
+      </div><button type="button">Check answer</button><p class="feedback" aria-live="polite"></p></fieldset>
+    <footer><a href="0009-shell-automation.html">Previous</a> · <a href="0011-mongodb-mcp-server.html">Next: MCP Server</a> · Ask your teacher which MongoDB skill fits your next task.</footer>
+  </main></body>
+</html>

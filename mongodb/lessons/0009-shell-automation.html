@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Lesson 0009: Shell automation</title><link rel="stylesheet" href="../assets/course.css"><script src="../assets/quiz.js" defer></script></head>
+  <body><main>
+    <p class="eyebrow">Lesson 0009 · 8 minutes</p><h1>Make a query useful to another program</h1>
+    <p class="lede">Lab 09 runs a fixed, read-only <code>mongosh</code> query from a
+      POSIX shell script and prints one JSON array. That makes its result easy to
+      save or pass to another tool.</p>
+    <div class="card"><pre>./scripts/09-shell-automation.sh &gt; students.json</pre>
+      <p>Use the script directly when redirecting output. <code>npm run</code>
+        adds its own command banner, which is useful for humans but not part of
+        the JSON result.</p></div>
+    <p>A local <code>mongod</code> speaks the MongoDB wire protocol, not HTTP;
+      that is why this lab uses <code>mongosh</code>, not <code>curl</code>.</p>
+    <p class="source">Source: <a href="https://www.mongodb.com/docs/mongodb-shell/">MongoDB Shell Documentation</a>.</p>
+    <div class="practice"><pre>npm run lesson:01
+npm run lab:09:shell</pre><p>Then run the script directly with output
+      redirection and inspect the JSON array.</p></div>
+    <fieldset class="quiz" data-quiz data-success="Correct. mongosh speaks to the local MongoDB deployment." data-retry="Try again: local mongod does not expose an HTTP API for curl.">
+      <legend>Which tool talks to the local MongoDB deployment here?</legend><div class="choices">
+        <label><input type="radio" name="q9" value="incorrect"> the curl</label>
+        <label><input type="radio" name="q9" value="correct"> the shell</label>
+        <label><input type="radio" name="q9" value="incorrect"> Compass app</label>
+        <label><input type="radio" name="q9" value="incorrect"> the export</label>
+      </div><button type="button">Check answer</button><p class="feedback" aria-live="polite"></p></fieldset>
+    <footer><a href="0008-python-driver.html">Previous</a> · <a href="0010-mongodb-agent-skills.html">Next: agent skills</a> · Ask your teacher which tool you would choose for your next local task.</footer>
+  </main></body>
+</html>

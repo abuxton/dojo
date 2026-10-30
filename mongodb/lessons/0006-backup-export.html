@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Lesson 0006: Export and backup</title><link rel="stylesheet" href="../assets/course.css"><script src="../assets/quiz.js" defer></script></head>
+  <body><main>
+    <p class="eyebrow">Lesson 0006 · 10 minutes</p><h1>Choose JSON for reading, BSON for restoring</h1>
+    <p class="lede">Lab 06 produces two artifacts from one collection. They are
+      related, but they serve different jobs.</p>
+    <div class="model"><div><strong>mongoexport</strong><span>readable JSON</span></div><div><strong>mongodump</strong><span>BSON backup</span></div><div><strong>mongorestore</strong><span>restore BSON</span></div></div>
+    <p>Use JSON to inspect or exchange simple documents. Use the BSON dump when
+      you want a database-oriented backup and restore workflow. The lab writes
+      both outputs to ignored local artifacts.</p>
+    <p class="source">Source: <a href="https://www.mongodb.com/docs/database-tools/">MongoDB Database Tools</a>.</p>
+    <div class="practice"><pre>npm run lesson:01
+npm run lab:06:export</pre><p>Open the JSON file under
+      <code>.mongodb-learning-artifacts/lab-06/</code>. Do not restore over
+      <code>mongodb_learning</code>; the lab documents a separate restore name.</p></div>
+    <fieldset class="quiz" data-quiz data-success="Correct. mongodump creates the BSON backup used by mongorestore." data-retry="Review the three tools: export makes JSON; dump makes BSON.">
+      <legend>Which command creates the BSON backup?</legend><div class="choices">
+        <label><input type="radio" name="q6" value="incorrect"> the export</label>
+        <label><input type="radio" name="q6" value="incorrect"> the restore</label>
+        <label><input type="radio" name="q6" value="incorrect"> the shell</label>
+        <label><input type="radio" name="q6" value="correct"> the dump</label>
+      </div><button type="button">Check answer</button><p class="feedback" aria-live="polite"></p></fieldset>
+    <footer><a href="0005-mongosh-query.html">Previous</a> · <a href="0007-compass-inspect.html">Next: Compass</a> · Ask your teacher when a backup is preferable to an export.</footer>
+  </main></body>
+</html>
