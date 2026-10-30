@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>MongoDB agent skills and MCP quick reference</title><link rel="stylesheet" href="../assets/course.css"></head>
+  <body><main>
+    <p class="eyebrow">Quick reference</p><h1>Skills guide; MCP connects</h1>
+    <p class="lede">Use a MongoDB agent skill to choose a reliable workflow. Use
+      the MongoDB MCP Server only when that workflow needs database context or
+      tools.</p>
+    <div class="model"><div><strong>Agent skill</strong><span>Task-specific instructions for an agent.</span></div><div><strong>MCP Server</strong><span>A bridge from an AI client to MongoDB tools.</span></div><div><strong>Course default</strong><span>Local database with read-only MCP access.</span></div></div>
+    <h2>Choose the skill</h2>
+    <div class="card"><p><code>mongodb-mcp-setup</code> — configure or troubleshoot MCP.</p><p><code>mongodb-natural-language-querying</code> — turn a question into a read-only query.</p><p><code>mongodb-schema-design</code> — make a data-model decision.</p><p><code>mongodb-query-optimizer</code> — investigate a slow query or index.</p></div>
+    <h2>Use the safe local workflow</h2>
+    <div class="practice"><pre>npm run db:up
+copilot --additional-mcp-config @mcp.json</pre><p>Keep <code>--readOnly</code> and the
+      <code>mongodb_learning</code> connection string. Ask for inspection or a
+      proposed read-only query; verify the generated operation before use.</p></div>
+    <p class="source">Sources: <a href="https://github.com/mongodb/agent-skills">MongoDB Agent Skills</a> and <a href="https://www.mongodb.com/docs/mcp-server/overview/">MongoDB MCP Server Overview</a>.</p>
+    <footer><a href="../lessons/0010-mongodb-agent-skills.html">Lesson 10</a> · <a href="../lessons/0011-mongodb-mcp-server.html">Lesson 11</a></footer>
+  </main></body>
+</html>

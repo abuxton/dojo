@@ -24,6 +24,12 @@
   Official desktop GUI documentation. Use for visual inspection in Lab 07.
 - [MongoDB MCP Server](https://www.mongodb.com/docs/mcp-server/)
   Official MCP server documentation. Use when safely exploring the local database through an AI client.
+- [MongoDB MCP Server Overview](https://www.mongodb.com/docs/mcp-server/overview/)
+  Primary explanation of the local and Atlas Managed MCP Server options. Use for Lesson 11's
+  read-only local workflow and deployment boundaries.
+- [MongoDB Agent Skills](https://github.com/mongodb/agent-skills)
+  Official collection of MongoDB agent skills for agentic workflows. Use for Lesson 10 when
+  selecting a task-specific skill before an agent queries or manages MongoDB.
 
 ## Wisdom
 

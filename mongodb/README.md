@@ -53,8 +53,8 @@ copilot --additional-mcp-config @mcp.json
 For another MCP-compatible client, add the `mongodb-learning` entry from
 `mcp.json` to that client's MCP configuration. The server is launched through
 `npx`; no project dependency or credentials are required for this local
-instance. Remove `--readOnly` only if you deliberately want an AI client to
-modify the learning database.
+instance. Keep `--readOnly` enabled in this learning workspace so an AI client
+can inspect, but not modify, the lesson data.
 
 ## Learning path
 
@@ -69,6 +69,8 @@ modify the learning database.
 | 7 | Compass exploration | connect → inspect documents, indexes, pipeline | `npm run lab:07:compass` |
 | 8 | PyMongo | `collection.update_one(filter, update)` | `npm run lab:08:python` |
 | 9 | Shell automation | `mongosh --quiet --eval` → JSON | `npm run lab:09:shell` |
+| 10 | MongoDB agent skills | skill instructions → agent workflow | Read Lesson 10 |
+| 11 | MongoDB MCP Server | Copilot CLI → read-only database tools | `npm run db:up` |
 
 Read a lesson before running it, change one query at a time, predict its
 result, then run it again. The [MongoDB Manual](https://www.mongodb.com/docs/manual/)
@@ -77,7 +79,7 @@ are the primary references for concepts that need more depth.
 
 ## Guided course
 
-Open the [guided course](lessons/index.html) for nine short, interactive
+Open the [guided course](lessons/index.html) for eleven short, interactive
 lessons tied to the runnable labs. Use `npm run <script>` for every command in
 this project—`npx run` does not run package scripts. The course mission,
 curated sources, reference material, and learning records live in
