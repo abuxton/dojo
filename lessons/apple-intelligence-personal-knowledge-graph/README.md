@@ -60,6 +60,8 @@ cd /Users/abuxton/src/github/dojo/lessons/apple-intelligence-personal-knowledge-
 macOS may require you to grant **Full Disk Access** to the terminal application
 that runs the command. Do that only if you accept the privacy implications, and
 revoke it afterwards if you do not otherwise need it.
+If macOS denies access, the utility exits with a message naming Full Disk
+Access instead of showing the underlying `find` error.
 
 Before querying, read the schema and formulate a narrow question. For example,
 this query exposes only table names rather than personal records:

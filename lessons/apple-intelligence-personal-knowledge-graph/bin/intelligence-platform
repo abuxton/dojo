@@ -41,7 +41,12 @@ case "$command" in
       printf 'Intelligence Platform directory not found at %s\n' "$root" >&2
       exit 1
     fi
-    find "$root" -maxdepth 1 -type f -print | sort
+    files=$(find "$root" -maxdepth 1 -type f -print 2>/dev/null) || {
+      printf 'Cannot list %s: macOS denied this terminal access.\n' "$root" >&2
+      printf 'Grant this terminal Full Disk Access in System Settings, then try again.\n' >&2
+      exit 1
+    }
+    printf '%s\n' "$files" | sort
     ;;
   tables)
     require_database
