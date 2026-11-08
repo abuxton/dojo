@@ -8,6 +8,13 @@ Intelligence Platform. You will inspect only your own machine, locally, with
 read-only commands. Do not paste query output into chat, tickets, or source
 control: the store may contain personal data about you and other people.
 
+## Interactive lessons
+
+Open the [lesson index](index.html) for the short, interactive course:
+
+1. [AFM and the Local Graph Boundary](0001-afm-and-local-graph-boundary.html)
+2. [Schema-First Local Graph Inspection](0002-schema-first-local-graph-inspection.html)
+
 > **Scope and confidence:** The Personal Knowledge Graph details in the article
 > are third-party reverse engineering, observed on macOS 26.6.2. They are not an
 > Apple API contract and may differ by OS version, hardware, configuration, or
