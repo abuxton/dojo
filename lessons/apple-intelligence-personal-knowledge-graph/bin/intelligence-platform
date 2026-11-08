@@ -1,0 +1,89 @@
+#!/bin/sh
+
+set -eu
+
+root="${APPLE_INTELLIGENCE_PLATFORM_DIR:-$HOME/Library/IntelligencePlatform}"
+database="$root/graph.db"
+
+usage() {
+  cat <<'EOF'
+Usage: intelligence-platform <command> [argument]
+
+Read-only inspection of the local Apple Intelligence Platform store.
+
+Commands:
+  inventory               List files in the platform directory.
+  tables                  List tables in graph.db.
+  schema [table-name]     Show graph.db schema, optionally for one table.
+  query "<read-only SQL>" Run one SELECT, WITH, EXPLAIN, or PRAGMA statement.
+
+Set APPLE_INTELLIGENCE_PLATFORM_DIR to inspect a fixture directory instead.
+EOF
+}
+
+require_database() {
+  if [ ! -f "$database" ]; then
+    printf 'graph.db not found at %s\n' "$database" >&2
+    printf 'The platform may be unavailable, or this terminal may need Full Disk Access.\n' >&2
+    exit 1
+  fi
+}
+
+run_sql() {
+  sqlite3 -readonly -header -column "$database" "$1"
+}
+
+command="${1:-}"
+
+case "$command" in
+  inventory)
+    if [ ! -d "$root" ]; then
+      printf 'Intelligence Platform directory not found at %s\n' "$root" >&2
+      exit 1
+    fi
+    find "$root" -maxdepth 1 -type f -print | sort
+    ;;
+  tables)
+    require_database
+    run_sql "SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name;"
+    ;;
+  schema)
+    require_database
+    table="${2:-}"
+    if [ -n "$table" ]; then
+      case "$table" in
+        *[!A-Za-z0-9_]*|'')
+          printf 'Table names may contain only letters, numbers, and underscores.\n' >&2
+          exit 2
+          ;;
+      esac
+      run_sql "SELECT sql FROM sqlite_master WHERE type IN ('table', 'view') AND name = '$table';"
+    else
+      run_sql "SELECT sql FROM sqlite_master WHERE type IN ('table', 'view') ORDER BY name;"
+    fi
+    ;;
+  query)
+    require_database
+    sql="${2:-}"
+    if [ -z "$sql" ]; then
+      printf 'A read-only SQL statement is required.\n' >&2
+      exit 2
+    fi
+    case "$sql" in
+      [Ss][Ee][Ll][Ee][Cc][Tt]*|[Ww][Ii][Tt][Hh]*|[Ee][Xx][Pp][Ll][Aa][Ii][Nn]*|[Pp][Rr][Aa][Gg][Mm][Aa]*)
+        run_sql "$sql"
+        ;;
+      *)
+        printf 'Only SELECT, WITH, EXPLAIN, and PRAGMA statements are accepted.\n' >&2
+        exit 2
+        ;;
+    esac
+    ;;
+  -h|--help|help|'')
+    usage
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
