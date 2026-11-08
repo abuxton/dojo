@@ -15,6 +15,9 @@ Commands:
   inventory               List files in the platform directory.
   tables                  List tables in graph.db.
   schema [table-name]     Show graph.db schema, optionally for one table.
+  walk                    Print a safe, educational schema exploration sequence.
+  profile <table-name>    Show aggregate-only metrics for entity or stable_graph.
+  predicate-summary       Count the most common stable_graph predicate codes.
   query "<read-only SQL>" Run one SELECT, WITH, EXPLAIN, or PRAGMA statement.
 
 Set APPLE_INTELLIGENCE_PLATFORM_DIR to inspect a fixture directory instead.
@@ -30,7 +33,32 @@ require_database() {
 }
 
 run_sql() {
-  sqlite3 -readonly -header -column "$database" "$1"
+  result=$(sqlite3 -readonly -header -column "$database" "$1" 2>&1) || {
+    printf 'Cannot read %s: macOS denied this terminal access or the database is unavailable.\n' "$database" >&2
+    printf 'Grant this terminal Full Disk Access in System Settings, then try again.\n' >&2
+    return 1
+  }
+  printf '%s\n' "$result"
+}
+
+walk() {
+  cat <<'EOF'
+Safe schema walk (no records are displayed):
+
+1. List table names:
+   intelligence-platform tables
+2. Read the raw-fact shape:
+   intelligence-platform schema entity
+3. Read the derived-relationship shape:
+   intelligence-platform schema stable_graph
+4. Count structure, not values:
+   intelligence-platform profile entity
+   intelligence-platform profile stable_graph
+5. Inspect relationship vocabulary, not personal records:
+   intelligence-platform predicate-summary
+
+Use query only after you understand the schema and have a narrow, local question.
+EOF
 }
 
 command="${1:-}"
@@ -66,6 +94,35 @@ case "$command" in
     else
       run_sql "SELECT sql FROM sqlite_master WHERE type IN ('table', 'view') ORDER BY name;"
     fi
+    ;;
+  walk)
+    walk
+    ;;
+  profile)
+    require_database
+    table="${2:-}"
+    case "$table" in
+      entity|stable_graph)
+        run_sql "SELECT '$table' AS table_name,
+                        COUNT(*) AS rows,
+                        COUNT(DISTINCT subject) AS subjects,
+                        COUNT(DISTINCT predicate) AS predicates,
+                        COUNT(DISTINCT relationshipId) AS relationships
+                 FROM \"$table\";"
+        ;;
+      *)
+        printf 'profile supports entity or stable_graph only.\n' >&2
+        exit 2
+        ;;
+    esac
+    ;;
+  predicate-summary)
+    require_database
+    run_sql "SELECT predicate, COUNT(*) AS facts
+             FROM stable_graph
+             GROUP BY predicate
+             ORDER BY facts DESC, predicate
+             LIMIT 25;"
     ;;
   query)
     require_database

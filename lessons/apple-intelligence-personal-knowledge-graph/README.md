@@ -90,7 +90,26 @@ doesn't start with `SELECT`, `WITH`, `EXPLAIN`, or `PRAGMA`; SQLite is also
 opened with `-readonly`. Those measures are safeguards, not a substitute for
 careful handling of the displayed data.
 
-## Lesson 3 - Check AFM from a command-line utility
+## Lesson 3 - Traverse structure before records
+
+Start the guided, aggregate-only schema walk:
+
+```sh
+./bin/intelligence-platform walk
+./bin/intelligence-platform profile entity
+./bin/intelligence-platform profile stable_graph
+./bin/intelligence-platform predicate-summary
+```
+
+On the machine used to develop this lesson, `entity` had fields for a source
+fact—such as `subject`, `predicate`, `object`, and `sourceId`. `stable_graph`
+had corresponding relationship fields plus `confidence`. The actual schema is
+an implementation detail and must be read from the learner's own database.
+`profile` counts structure without printing fact values; `predicate-summary`
+lists relationship vocabulary codes and their counts, also without printing
+values. Treat both as local observations, not a public API.
+
+## Lesson 4 - Check AFM from a command-line utility
 
 `bin/afm-check.swift` checks whether `SystemLanguageModel.default` is available.
 It does not send a prompt or access the local graph.

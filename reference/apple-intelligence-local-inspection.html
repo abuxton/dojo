@@ -31,6 +31,17 @@
     <p>Only then write a narrow <code>SELECT … LIMIT 5</code> query. Keep every
       result on the Mac; the tool opens SQLite with <code>-readonly</code>.</p>
 
+    <h2>Safe schema traversal</h2>
+    <pre><code>./lessons/apple-intelligence-personal-knowledge-graph/bin/intelligence-platform walk
+./lessons/apple-intelligence-personal-knowledge-graph/bin/intelligence-platform profile entity
+./lessons/apple-intelligence-personal-knowledge-graph/bin/intelligence-platform profile stable_graph
+./lessons/apple-intelligence-personal-knowledge-graph/bin/intelligence-platform predicate-summary</code></pre>
+    <p><code>entity</code> is the source-fact table shape observed on this Mac;
+      <code>stable_graph</code> is the derived-relationship shape with a
+      confidence field. Profiles and predicate summaries expose counts and
+      vocabulary codes, not fact values. Read your own schema before drawing
+      conclusions.</p>
+
     <h2>AFM app boundary</h2>
     <ol>
       <li>Check <code>SystemLanguageModel.default.availability</code>.</li>
