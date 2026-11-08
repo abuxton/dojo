@@ -1,0 +1,254 @@
+#!/bin/sh
+
+set -eu
+
+root="${APPLE_INTELLIGENCE_PLATFORM_DIR:-$HOME/Library/IntelligencePlatform}"
+database="$root/graph.db"
+program="$(basename "$0")"
+mode="run"
+
+usage() {
+  cat <<EOF
+Usage: $program [--dry-run | --do-nothing] <command> [argument]
+
+Read-only inspection of the local Apple Intelligence Platform store.
+
+Modes:
+  --dry-run               Print the shell or SQL operation without running it.
+  --do-nothing            Print a manual, step-by-step procedure and wait.
+
+Commands:
+  inventory               List files in the platform directory.
+  catalog                 List table and view names with their SQLite type.
+  tables                  List table names.
+  schema [table-name]     Show schema SQL, optionally for one table.
+  row-count <table-name>  Count rows without displaying records.
+  preview <table> [limit] Display explicitly requested rows; default limit is 5.
+  profile <table-name>    Show aggregate-only metrics for entity or stable_graph.
+  predicate-summary       Count the most common stable_graph predicate codes.
+  walk                    Print a safe, educational schema exploration sequence.
+  query "<read-only SQL>" Run one SELECT, WITH, EXPLAIN, or PRAGMA statement.
+
+Set APPLE_INTELLIGENCE_PLATFORM_DIR to inspect a fixture directory instead.
+EOF
+}
+
+require_database() {
+  if [ "$mode" = "dry-run" ]; then
+    return
+  fi
+
+  if [ ! -f "$database" ]; then
+    printf 'graph.db not found at %s\n' "$database" >&2
+    printf 'The platform may be unavailable, or this terminal may need Full Disk Access.\n' >&2
+    exit 1
+  fi
+}
+
+require_table_name() {
+  case "$1" in
+    *[!A-Za-z0-9_]*|'')
+      printf 'Table names may contain only letters, numbers, and underscores.\n' >&2
+      exit 2
+      ;;
+  esac
+}
+
+require_limit() {
+  case "$1" in
+    *[!0-9]*|'')
+      printf 'The preview limit must be a positive whole number.\n' >&2
+      exit 2
+      ;;
+  esac
+}
+
+run_sql() {
+  if [ "$mode" = "dry-run" ]; then
+    printf 'Would run read-only SQL against %s:\n%s\n' "$database" "$1"
+    return
+  fi
+
+  result=$(sqlite3 -readonly -header -column "$database" "$1" 2>&1) || {
+    printf 'Cannot read %s: macOS denied this terminal access or the database is unavailable.\n' "$database" >&2
+    printf 'Grant this terminal Full Disk Access in System Settings, then try again.\n' >&2
+    return 1
+  }
+  printf '%s\n' "$result"
+}
+
+pause() {
+  if [ -t 0 ]; then
+    read -r _ </dev/tty || true
+  fi
+}
+
+manual_step() {
+  printf '==> %s\n%s\n' "$1" "$2"
+  if [ -t 0 ]; then
+    printf '    Press Enter when complete... ' >&2
+    pause
+    printf '\n' >&2
+  fi
+}
+
+do_nothing() {
+  cat <<EOF
+Do-nothing walkthrough: no database command will execute.
+Repository tool: $program
+
+EOF
+  manual_step "Step 1: Verify access" "    Run: $program inventory"
+  manual_step "Step 2: Map objects" "    Run: $program catalog"
+  manual_step "Step 3: Read graph shapes" "    Run: $program schema entity
+    Run: $program schema stable_graph"
+  manual_step "Step 4: Abstract safely" "    Run: $program row-count entity
+    Run: $program profile stable_graph
+    Run: $program predicate-summary"
+  manual_step "Step 5: Inspect records deliberately" "    Only after choosing a narrow local question:
+    Run: $program preview <table-name> 5"
+  printf 'Done. This mode did not access the database.\n'
+}
+
+walk() {
+  cat <<EOF
+Safe schema walk (no records are displayed):
+
+1. List table and view names:
+   $program catalog
+2. Read a table definition:
+   $program schema <table-name>
+3. Count rows without values:
+   $program row-count <table-name>
+4. Inspect graph-specific aggregates:
+   $program profile entity
+   $program profile stable_graph
+   $program predicate-summary
+5. To display records, choose a narrow local question first:
+   $program preview <table-name> 5
+
+Use query only after you understand the schema and have a narrow, local question.
+EOF
+}
+
+case "${1:-}" in
+  --dry-run)
+    mode="dry-run"
+    shift
+    ;;
+  --do-nothing)
+    mode="do-nothing"
+    shift
+    ;;
+esac
+
+if [ "$mode" = "do-nothing" ]; then
+  do_nothing
+  exit
+fi
+
+command="${1:-}"
+
+case "$command" in
+  inventory)
+    if [ "$mode" = "dry-run" ]; then
+      printf 'Would run: find %s -maxdepth 1 -type f -print | sort\n' "$root"
+      exit
+    fi
+    if [ ! -d "$root" ]; then
+      printf 'Intelligence Platform directory not found at %s\n' "$root" >&2
+      exit 1
+    fi
+    files=$(find "$root" -maxdepth 1 -type f -print 2>/dev/null) || {
+      printf 'Cannot list %s: macOS denied this terminal access.\n' "$root" >&2
+      printf 'Grant this terminal Full Disk Access in System Settings, then try again.\n' >&2
+      exit 1
+    }
+    printf '%s\n' "$files" | sort
+    ;;
+  catalog)
+    require_database
+    run_sql "SELECT name, type FROM sqlite_master WHERE type IN ('table', 'view') ORDER BY name;"
+    ;;
+  tables)
+    require_database
+    run_sql "SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name;"
+    ;;
+  schema)
+    require_database
+    table="${2:-}"
+    if [ -n "$table" ]; then
+      require_table_name "$table"
+      run_sql "SELECT sql FROM sqlite_master WHERE type IN ('table', 'view') AND name = '$table';"
+    else
+      run_sql "SELECT sql FROM sqlite_master WHERE type IN ('table', 'view') ORDER BY name;"
+    fi
+    ;;
+  row-count)
+    require_database
+    table="${2:-}"
+    require_table_name "$table"
+    run_sql "SELECT '$table' AS table_name, COUNT(*) AS rows FROM \"$table\";"
+    ;;
+  preview)
+    require_database
+    table="${2:-}"
+    limit="${3:-5}"
+    require_table_name "$table"
+    require_limit "$limit"
+    run_sql "SELECT * FROM \"$table\" LIMIT $limit;"
+    ;;
+  profile)
+    require_database
+    table="${2:-}"
+    case "$table" in
+      entity|stable_graph)
+        run_sql "SELECT '$table' AS table_name,
+                        COUNT(*) AS rows,
+                        COUNT(DISTINCT subject) AS subjects,
+                        COUNT(DISTINCT predicate) AS predicates,
+                        COUNT(DISTINCT relationshipId) AS relationships
+                 FROM \"$table\";"
+        ;;
+      *)
+        printf 'profile supports entity or stable_graph only.\n' >&2
+        exit 2
+        ;;
+    esac
+    ;;
+  predicate-summary)
+    require_database
+    run_sql "SELECT predicate, COUNT(*) AS facts
+             FROM stable_graph
+             GROUP BY predicate
+             ORDER BY facts DESC, predicate
+             LIMIT 25;"
+    ;;
+  walk)
+    walk
+    ;;
+  query)
+    require_database
+    sql="${2:-}"
+    if [ -z "$sql" ]; then
+      printf 'A read-only SQL statement is required.\n' >&2
+      exit 2
+    fi
+    case "$sql" in
+      [Ss][Ee][Ll][Ee][Cc][Tt]*|[Ww][Ii][Tt][Hh]*|[Ee][Xx][Pp][Ll][Aa][Ii][Nn]*|[Pp][Rr][Aa][Gg][Mm][Aa]*)
+        run_sql "$sql"
+        ;;
+      *)
+        printf 'Only SELECT, WITH, EXPLAIN, and PRAGMA statements are accepted.\n' >&2
+        exit 2
+        ;;
+    esac
+    ;;
+  -h|--help|help|'')
+    usage
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac

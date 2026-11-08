@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 3: Schema Catalog and Safe Queries</title>
+  <link rel="stylesheet" href="../../assets/teach.css">
+  <script src="../../assets/quiz.js" defer></script>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Lesson 3 · 15 minutes · schema map and local queries</p>
+    <h1>Read the map, then choose the query</h1>
+    <p class="lede">This catalog records the 30 table objects observed in this
+      Mac's <code>graph.db</code>. It is a local observation, not an Apple API
+      contract. Run <code>catalog</code> on your own Mac before relying on it.</p>
+
+    <h2>Linked schema map</h2>
+    <p>Each name links to its catalog entry below. The groups are a navigation
+      aid inferred from table names; they do not prove a database relationship.</p>
+    <svg class="schema-map" viewBox="0 0 760 510" role="img" aria-label="Linked map of the local graph database tables">
+      <rect class="group" x="10" y="10" width="360" height="170" rx="8"/>
+      <text x="25" y="35">Graph and search tables</text>
+      <a href="#table-entity"><text x="25" y="60">entity</text></a>
+      <a href="#table-stable_graph"><text x="25" y="82">stable_graph</text></a>
+      <a href="#table-event_graph"><text x="25" y="104">event_graph</text></a>
+      <a href="#table-event_graph_fts"><text x="25" y="126">event_graph_fts + support</text></a>
+      <a href="#table-stable_graph_fts"><text x="25" y="148">stable_graph_fts + support</text></a>
+      <a href="#table-embeddings"><text x="25" y="170">embeddings</text></a>
+
+      <rect class="group" x="390" y="10" width="360" height="170" rx="8"/>
+      <text x="405" y="35">Construction and expiry tables</text>
+      <a href="#table-construction_event_graph"><text x="405" y="60">construction_event_graph</text></a>
+      <a href="#table-construction_stable_graph"><text x="405" y="82">construction_stable_graph</text></a>
+      <a href="#table-construction_phase_status"><text x="405" y="104">construction_phase_status</text></a>
+      <a href="#table-construction_progress_tokens"><text x="405" y="126">construction_progress_tokens</text></a>
+      <a href="#table-expired_construction_event_graph"><text x="405" y="148">expired_* tables</text></a>
+      <a href="#table-expired_event_graph"><text x="405" y="170">expired_event_graph / stable_graph</text></a>
+
+      <rect class="group" x="10" y="200" width="360" height="130" rx="8"/>
+      <text x="25" y="225">State and progress tables</text>
+      <a href="#table-blocks"><text x="25" y="250">blocks</text></a>
+      <a href="#table-graph_state"><text x="25" y="272">graph_state</text></a>
+      <a href="#table-phase_status"><text x="25" y="294">phase_status</text></a>
+      <a href="#table-progress_tokens"><text x="25" y="316">progress_tokens</text></a>
+
+      <rect class="group" x="390" y="200" width="360" height="130" rx="8"/>
+      <text x="405" y="225">Matching and metadata tables</text>
+      <a href="#table-matches"><text x="405" y="250">matches</text></a>
+      <a href="#table-pairs"><text x="405" y="272">pairs</text></a>
+      <a href="#table-schemaMetadata"><text x="405" y="294">schemaMetadata</text></a>
+      <a href="#table-translated"><text x="405" y="316">translated</text></a>
+
+      <rect class="group" x="10" y="350" width="740" height="145" rx="8"/>
+      <text x="25" y="375">Full-text-search support objects</text>
+      <a href="#table-event_graph_fts_config"><text x="25" y="400">event_graph_fts_config</text></a>
+      <a href="#table-event_graph_fts_data"><text x="25" y="422">event_graph_fts_data</text></a>
+      <a href="#table-event_graph_fts_docsize"><text x="25" y="444">event_graph_fts_docsize</text></a>
+      <a href="#table-event_graph_fts_idx"><text x="25" y="466">event_graph_fts_idx</text></a>
+      <a href="#table-stable_graph_fts_config"><text x="390" y="400">stable_graph_fts_config</text></a>
+      <a href="#table-stable_graph_fts_data"><text x="390" y="422">stable_graph_fts_data</text></a>
+      <a href="#table-stable_graph_fts_docsize"><text x="390" y="444">stable_graph_fts_docsize</text></a>
+      <a href="#table-stable_graph_fts_idx"><text x="390" y="466">stable_graph_fts_idx</text></a>
+    </svg>
+    <p><strong>All table links:</strong>
+      <a href="#table-blocks">blocks</a>,
+      <a href="#table-construction_event_graph">construction_event_graph</a>,
+      <a href="#table-construction_phase_status">construction_phase_status</a>,
+      <a href="#table-construction_progress_tokens">construction_progress_tokens</a>,
+      <a href="#table-construction_stable_graph">construction_stable_graph</a>,
+      <a href="#table-embeddings">embeddings</a>,
+      <a href="#table-entity">entity</a>,
+      <a href="#table-event_graph">event_graph</a>,
+      <a href="#table-event_graph_fts">event_graph_fts</a>,
+      <a href="#table-event_graph_fts_config">event_graph_fts_config</a>,
+      <a href="#table-event_graph_fts_data">event_graph_fts_data</a>,
+      <a href="#table-event_graph_fts_docsize">event_graph_fts_docsize</a>,
+      <a href="#table-event_graph_fts_idx">event_graph_fts_idx</a>,
+      <a href="#table-expired_construction_event_graph">expired_construction_event_graph</a>,
+      <a href="#table-expired_construction_stable_graph">expired_construction_stable_graph</a>,
+      <a href="#table-expired_event_graph">expired_event_graph</a>,
+      <a href="#table-expired_stable_graph">expired_stable_graph</a>,
+      <a href="#table-graph_state">graph_state</a>,
+      <a href="#table-matches">matches</a>,
+      <a href="#table-pairs">pairs</a>,
+      <a href="#table-phase_status">phase_status</a>,
+      <a href="#table-progress_tokens">progress_tokens</a>,
+      <a href="#table-schemaMetadata">schemaMetadata</a>,
+      <a href="#table-stable_graph">stable_graph</a>,
+      <a href="#table-stable_graph_fts">stable_graph_fts</a>,
+      <a href="#table-stable_graph_fts_config">stable_graph_fts_config</a>,
+      <a href="#table-stable_graph_fts_data">stable_graph_fts_data</a>,
+      <a href="#table-stable_graph_fts_docsize">stable_graph_fts_docsize</a>,
+      <a href="#table-stable_graph_fts_idx">stable_graph_fts_idx</a>,
+      <a href="#table-translated">translated</a>.
+    </p>
+
+    <h2>Choose an execution mode</h2>
+    <pre><code>./bin/intelligence-platform --dry-run schema entity
+./bin/intelligence-platform --do-nothing
+./bin/intelligence-platform schema entity</code></pre>
+    <p><code>--dry-run</code> prints the operation without opening the store.
+      <code>--do-nothing</code> prints and pauses through a manual procedure
+      without executing commands. With neither mode, the utility runs read-only
+      SQLite operations. <code>preview</code> is the only helper below that
+      displays records, and it runs only when you explicitly choose it.</p>
+
+    <h2>Catalog: schema and query examples</h2>
+    <p>In every row, the first command shows the definition; the second counts
+      rows without values. The third is an explicitly requested local preview.
+      The SQL equivalents show the same count and limited-preview patterns.</p>
+    <table class="schema-catalog">
+      <thead><tr><th>Table</th><th>Helper commands</th><th>Equivalent SQL</th></tr></thead>
+      <tbody>
+        <tr id="table-blocks"><td>blocks</td><td>schema blocks<br>row-count blocks<br>preview blocks 5</td><td>SELECT COUNT(*) FROM "blocks"<br>SELECT * FROM "blocks" LIMIT 5</td></tr>
+        <tr id="table-construction_event_graph"><td>construction_event_graph</td><td>schema construction_event_graph<br>row-count construction_event_graph<br>preview construction_event_graph 5</td><td>SELECT COUNT(*) FROM "construction_event_graph"<br>SELECT * FROM "construction_event_graph" LIMIT 5</td></tr>
+        <tr id="table-construction_phase_status"><td>construction_phase_status</td><td>schema construction_phase_status<br>row-count construction_phase_status<br>preview construction_phase_status 5</td><td>SELECT COUNT(*) FROM "construction_phase_status"<br>SELECT * FROM "construction_phase_status" LIMIT 5</td></tr>
+        <tr id="table-construction_progress_tokens"><td>construction_progress_tokens</td><td>schema construction_progress_tokens<br>row-count construction_progress_tokens<br>preview construction_progress_tokens 5</td><td>SELECT COUNT(*) FROM "construction_progress_tokens"<br>SELECT * FROM "construction_progress_tokens" LIMIT 5</td></tr>
+        <tr id="table-construction_stable_graph"><td>construction_stable_graph</td><td>schema construction_stable_graph<br>row-count construction_stable_graph<br>preview construction_stable_graph 5</td><td>SELECT COUNT(*) FROM "construction_stable_graph"<br>SELECT * FROM "construction_stable_graph" LIMIT 5</td></tr>
+        <tr id="table-embeddings"><td>embeddings</td><td>schema embeddings<br>row-count embeddings<br>preview embeddings 5</td><td>SELECT COUNT(*) FROM "embeddings"<br>SELECT * FROM "embeddings" LIMIT 5</td></tr>
+        <tr id="table-entity"><td>entity</td><td>schema entity<br>row-count entity<br>preview entity 5</td><td>SELECT COUNT(*) FROM "entity"<br>SELECT * FROM "entity" LIMIT 5</td></tr>
+        <tr id="table-event_graph"><td>event_graph</td><td>schema event_graph<br>row-count event_graph<br>preview event_graph 5</td><td>SELECT COUNT(*) FROM "event_graph"<br>SELECT * FROM "event_graph" LIMIT 5</td></tr>
+        <tr id="table-event_graph_fts"><td>event_graph_fts</td><td>schema event_graph_fts<br>row-count event_graph_fts<br>preview event_graph_fts 5</td><td>SELECT COUNT(*) FROM "event_graph_fts"<br>SELECT * FROM "event_graph_fts" LIMIT 5</td></tr>
+        <tr id="table-event_graph_fts_config"><td>event_graph_fts_config</td><td>schema event_graph_fts_config<br>row-count event_graph_fts_config<br>preview event_graph_fts_config 5</td><td>SELECT COUNT(*) FROM "event_graph_fts_config"<br>SELECT * FROM "event_graph_fts_config" LIMIT 5</td></tr>
+        <tr id="table-event_graph_fts_data"><td>event_graph_fts_data</td><td>schema event_graph_fts_data<br>row-count event_graph_fts_data<br>preview event_graph_fts_data 5</td><td>SELECT COUNT(*) FROM "event_graph_fts_data"<br>SELECT * FROM "event_graph_fts_data" LIMIT 5</td></tr>
+        <tr id="table-event_graph_fts_docsize"><td>event_graph_fts_docsize</td><td>schema event_graph_fts_docsize<br>row-count event_graph_fts_docsize<br>preview event_graph_fts_docsize 5</td><td>SELECT COUNT(*) FROM "event_graph_fts_docsize"<br>SELECT * FROM "event_graph_fts_docsize" LIMIT 5</td></tr>
+        <tr id="table-event_graph_fts_idx"><td>event_graph_fts_idx</td><td>schema event_graph_fts_idx<br>row-count event_graph_fts_idx<br>preview event_graph_fts_idx 5</td><td>SELECT COUNT(*) FROM "event_graph_fts_idx"<br>SELECT * FROM "event_graph_fts_idx" LIMIT 5</td></tr>
+        <tr id="table-expired_construction_event_graph"><td>expired_construction_event_graph</td><td>schema expired_construction_event_graph<br>row-count expired_construction_event_graph<br>preview expired_construction_event_graph 5</td><td>SELECT COUNT(*) FROM "expired_construction_event_graph"<br>SELECT * FROM "expired_construction_event_graph" LIMIT 5</td></tr>
+        <tr id="table-expired_construction_stable_graph"><td>expired_construction_stable_graph</td><td>schema expired_construction_stable_graph<br>row-count expired_construction_stable_graph<br>preview expired_construction_stable_graph 5</td><td>SELECT COUNT(*) FROM "expired_construction_stable_graph"<br>SELECT * FROM "expired_construction_stable_graph" LIMIT 5</td></tr>
+        <tr id="table-expired_event_graph"><td>expired_event_graph</td><td>schema expired_event_graph<br>row-count expired_event_graph<br>preview expired_event_graph 5</td><td>SELECT COUNT(*) FROM "expired_event_graph"<br>SELECT * FROM "expired_event_graph" LIMIT 5</td></tr>
+        <tr id="table-expired_stable_graph"><td>expired_stable_graph</td><td>schema expired_stable_graph<br>row-count expired_stable_graph<br>preview expired_stable_graph 5</td><td>SELECT COUNT(*) FROM "expired_stable_graph"<br>SELECT * FROM "expired_stable_graph" LIMIT 5</td></tr>
+        <tr id="table-graph_state"><td>graph_state</td><td>schema graph_state<br>row-count graph_state<br>preview graph_state 5</td><td>SELECT COUNT(*) FROM "graph_state"<br>SELECT * FROM "graph_state" LIMIT 5</td></tr>
+        <tr id="table-matches"><td>matches</td><td>schema matches<br>row-count matches<br>preview matches 5</td><td>SELECT COUNT(*) FROM "matches"<br>SELECT * FROM "matches" LIMIT 5</td></tr>
+        <tr id="table-pairs"><td>pairs</td><td>schema pairs<br>row-count pairs<br>preview pairs 5</td><td>SELECT COUNT(*) FROM "pairs"<br>SELECT * FROM "pairs" LIMIT 5</td></tr>
+        <tr id="table-phase_status"><td>phase_status</td><td>schema phase_status<br>row-count phase_status<br>preview phase_status 5</td><td>SELECT COUNT(*) FROM "phase_status"<br>SELECT * FROM "phase_status" LIMIT 5</td></tr>
+        <tr id="table-progress_tokens"><td>progress_tokens</td><td>schema progress_tokens<br>row-count progress_tokens<br>preview progress_tokens 5</td><td>SELECT COUNT(*) FROM "progress_tokens"<br>SELECT * FROM "progress_tokens" LIMIT 5</td></tr>
+        <tr id="table-schemaMetadata"><td>schemaMetadata</td><td>schema schemaMetadata<br>row-count schemaMetadata<br>preview schemaMetadata 5</td><td>SELECT COUNT(*) FROM "schemaMetadata"<br>SELECT * FROM "schemaMetadata" LIMIT 5</td></tr>
+        <tr id="table-stable_graph"><td>stable_graph</td><td>schema stable_graph<br>row-count stable_graph<br>preview stable_graph 5</td><td>SELECT COUNT(*) FROM "stable_graph"<br>SELECT * FROM "stable_graph" LIMIT 5</td></tr>
+        <tr id="table-stable_graph_fts"><td>stable_graph_fts</td><td>schema stable_graph_fts<br>row-count stable_graph_fts<br>preview stable_graph_fts 5</td><td>SELECT COUNT(*) FROM "stable_graph_fts"<br>SELECT * FROM "stable_graph_fts" LIMIT 5</td></tr>
+        <tr id="table-stable_graph_fts_config"><td>stable_graph_fts_config</td><td>schema stable_graph_fts_config<br>row-count stable_graph_fts_config<br>preview stable_graph_fts_config 5</td><td>SELECT COUNT(*) FROM "stable_graph_fts_config"<br>SELECT * FROM "stable_graph_fts_config" LIMIT 5</td></tr>
+        <tr id="table-stable_graph_fts_data"><td>stable_graph_fts_data</td><td>schema stable_graph_fts_data<br>row-count stable_graph_fts_data<br>preview stable_graph_fts_data 5</td><td>SELECT COUNT(*) FROM "stable_graph_fts_data"<br>SELECT * FROM "stable_graph_fts_data" LIMIT 5</td></tr>
+        <tr id="table-stable_graph_fts_docsize"><td>stable_graph_fts_docsize</td><td>schema stable_graph_fts_docsize<br>row-count stable_graph_fts_docsize<br>preview stable_graph_fts_docsize 5</td><td>SELECT COUNT(*) FROM "stable_graph_fts_docsize"<br>SELECT * FROM "stable_graph_fts_docsize" LIMIT 5</td></tr>
+        <tr id="table-stable_graph_fts_idx"><td>stable_graph_fts_idx</td><td>schema stable_graph_fts_idx<br>row-count stable_graph_fts_idx<br>preview stable_graph_fts_idx 5</td><td>SELECT COUNT(*) FROM "stable_graph_fts_idx"<br>SELECT * FROM "stable_graph_fts_idx" LIMIT 5</td></tr>
+        <tr id="table-translated"><td>translated</td><td>schema translated<br>row-count translated<br>preview translated 5</td><td>SELECT COUNT(*) FROM "translated"<br>SELECT * FROM "translated" LIMIT 5</td></tr>
+      </tbody>
+    </table>
+
+    <div class="practice">
+      <strong>Retrieval practice — answer before clicking.</strong>
+      <p>Which mode lets you inspect the planned SQL without opening the store?</p>
+      <div data-quiz
+        data-success="Correct. Dry-run prints the intended operation without database access."
+        data-retry="Try again. Choose the mode that prints the operation rather than running or guiding it.">
+        <button type="button" data-correct="true">dry-run mode</button>
+        <button type="button" data-correct="false">preview command</button>
+        <p class="feedback" data-feedback aria-live="polite"></p>
+      </div>
+    </div>
+
+    <p class="source">Start with Apple’s
+      <a href="https://developer.apple.com/documentation/FoundationModels">Foundation Models documentation</a>
+      for the supported model API. This local database catalog remains
+      version-specific research context.</p>
+  </main>
+</body>
+</html>

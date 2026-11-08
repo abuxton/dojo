@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 2: Schema-First Local Graph Inspection</title>
+  <link rel="stylesheet" href="../../assets/teach.css">
+  <script src="../../assets/quiz.js" defer></script>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Lesson 2 · 10 minutes · aggregate-only exploration</p>
+    <h1>Map the graph before you inspect it</h1>
+    <p class="lede">A schema tells you what a store can represent. It does not
+      require you to view the personal records it contains.</p>
+
+    <h2>Use a safe traversal</h2>
+    <p>Run the guided sequence. It prints commands only; execute each command
+      deliberately.</p>
+    <pre><code>cd /Users/abuxton/src/github/dojo/lessons/apple-intelligence-personal-knowledge-graph
+./bin/intelligence-platform walk</code></pre>
+    <p>On this Mac, the schema exposed an <code>entity</code> table with
+      source-fact fields including <code>subject</code>, <code>predicate</code>,
+      and <code>object</code>. It also exposed <code>stable_graph</code>, which
+      adds relationship and confidence fields. Your OS version may differ, so
+      inspect your local schema rather than copying this conclusion.</p>
+
+    <h2>Abstract before you reveal</h2>
+    <p>These commands return counts and predicate codes, not object values:</p>
+    <pre><code>./bin/intelligence-platform profile entity
+./bin/intelligence-platform profile stable_graph
+./bin/intelligence-platform predicate-summary</code></pre>
+    <p>A high count is not evidence that a specific person, message, or event is
+      stored. It only measures rows or relationship vocabulary in the local
+      database.</p>
+
+    <div class="practice">
+      <strong>Retrieval practice — answer before clicking.</strong>
+      <p>Which command best answers “what relationship types occur most often?”
+      without exposing fact values?</p>
+      <div data-quiz
+        data-success="Correct. The predicate summary groups and counts relationship vocabulary."
+        data-retry="Try again. Choose the aggregate command that groups vocabulary rather than showing rows.">
+        <button type="button" data-correct="true">predicate-summary command</button>
+        <button type="button" data-correct="false">query rows command</button>
+        <p class="feedback" data-feedback aria-live="polite"></p>
+      </div>
+    </div>
+
+    <h2>Decision point</h2>
+    <p>Only write a direct query when you can state its minimum columns, filter,
+      and limit. Keep its output local. See the
+      <a href="../../reference/apple-intelligence-local-inspection.html">reference</a>
+      for the sequence, then ask your teacher before moving from aggregates to
+      records.</p>
+
+    <p class="source"><strong>Research context:</strong> the
+      <a href="https://8rank.ai/game/apple-intelligence-personal-knowledge-graph">8rank analysis</a>
+      describes the store as a graph. It remains third-party, version-specific
+      research; this lesson teaches observation, not an undocumented API.</p>
+  </main>
+</body>
+</html>
