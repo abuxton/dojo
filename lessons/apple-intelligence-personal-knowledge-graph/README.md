@@ -14,6 +14,7 @@ Open the [lesson index](index.html) for the short, interactive course:
 
 1. [AFM and the Local Graph Boundary](0001-afm-and-local-graph-boundary.html)
 2. [Schema-First Local Graph Inspection](0002-schema-first-local-graph-inspection.html)
+3. [Schema Catalog and Safe Queries](0003-schema-catalog-and-safe-queries.html)
 
 > **Scope and confidence:** The Personal Knowledge Graph details in the article
 > are third-party reverse engineering, observed on macOS 26.6.2. They are not an
@@ -115,6 +116,26 @@ an implementation detail and must be read from the learner's own database.
 `profile` counts structure without printing fact values; `predicate-summary`
 lists relationship vocabulary codes and their counts, also without printing
 values. Treat both as local observations, not a public API.
+
+### Tool modes
+
+The utility executes read-only operations by default. Preview data only when
+you intentionally request it, and keep the result local:
+
+```sh
+./bin/intelligence-platform catalog
+./bin/intelligence-platform row-count entity
+./bin/intelligence-platform preview entity 5
+```
+
+Use `--dry-run` to see the SQL or shell operation without opening the local
+store, and `--do-nothing` for an interactive manual procedure that never
+executes database commands:
+
+```sh
+./bin/intelligence-platform --dry-run schema stable_graph
+./bin/intelligence-platform --do-nothing
+```
 
 ## Lesson 4 - Check AFM from a command-line utility
 
