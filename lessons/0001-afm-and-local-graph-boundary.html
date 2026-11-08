@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 1: AFM and the Local Graph Boundary</title>
+  <link rel="stylesheet" href="../assets/teach.css">
+  <script src="../assets/quiz.js" defer></script>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Lesson 1 · 10 minutes · safe local inspection</p>
+    <h1>AFM is not your Mac’s personal graph</h1>
+    <p class="lede">Your goal is to inspect the local Intelligence Platform
+      safely and design an app that does not assume it can query it.</p>
+
+    <div class="callout">
+      <strong>One distinction to retain:</strong> AFM is the documented model
+      layer. The Intelligence Platform is the local OS data store described by
+      third-party research. Finding the latter does not prove a public bridge
+      to the former.
+    </div>
+
+    <h2>Learn the boundary</h2>
+    <p>Apple documents <code>SystemLanguageModel</code> and
+      <code>LanguageModelSession</code> in its <a href="https://developer.apple.com/documentation/FoundationModels">Foundation Models framework</a>.
+      The 8rank article reports a local store under
+      <code>~/Library/IntelligencePlatform</code>, but that report is
+      reverse-engineering from a specific macOS release, not an API contract.</p>
+    <p>For an app, use an explicit tool or a trusted data source when the model
+      needs data. Check model availability first and provide a fallback if it is
+      unavailable.</p>
+
+    <h2>Do one safe thing</h2>
+    <p>Run this command. It lists only local platform files; it does not copy or
+      modify them.</p>
+    <pre><code>cd /Users/abuxton/src/github/dojo
+./lessons/apple-intelligence-personal-knowledge-graph/bin/intelligence-platform inventory</code></pre>
+    <p>If the directory is absent, that is a valid result. If macOS denies
+      access, decide deliberately whether to give your terminal Full Disk
+      Access—then revoke it later if you do not otherwise need it. Never paste
+      personal query output into chat, issues, or source control.</p>
+
+    <div class="practice">
+      <strong>Retrieval practice — answer before clicking.</strong>
+      <p>Which layer has the documented application API?</p>
+      <div data-quiz
+        data-success="Correct. Foundation Models is the documented app-facing layer."
+        data-retry="Not quite. Re-read the boundary: the local store is research context, not the documented app API.">
+        <button type="button" data-correct="true">Foundation Models framework</button>
+        <button type="button" data-correct="false">Intelligence Platform directory</button>
+        <p class="feedback" data-feedback aria-live="polite"></p>
+      </div>
+    </div>
+
+    <h2>Next command</h2>
+    <p>When you are ready to inspect metadata—not records—run:</p>
+    <pre><code>./lessons/apple-intelligence-personal-knowledge-graph/bin/intelligence-platform tables</code></pre>
+    <p>Keep the <a href="../reference/apple-intelligence-local-inspection.html">local-inspection reference</a>
+      open for the command sequence. Ask your teacher a follow-up question if
+      the database names, permissions, or AFM availability state are unclear.</p>
+
+    <p class="source"><strong>Primary reading:</strong> Apple’s
+      <a href="https://developer.apple.com/documentation/FoundationModels/detecting-available-apple-foundation-models">Detecting available Apple Foundation Models</a>.
+      The local-store context comes from the third-party
+      <a href="https://8rank.ai/game/apple-intelligence-personal-knowledge-graph">8rank analysis</a>.</p>
+  </main>
+</body>
+</html>

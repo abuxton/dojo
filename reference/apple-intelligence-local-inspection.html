@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reference: Apple Intelligence Local Inspection</title>
+  <link rel="stylesheet" href="../assets/teach.css">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Course reference</p>
+    <h1>Local inspection, compressed</h1>
+    <p class="lede">Keep this beside the terminal. It separates documented AFM
+      behavior from version-specific findings about the local data store.</p>
+
+    <h2>Boundary</h2>
+    <dl>
+      <dt><strong>Apple Foundation Models (AFM)</strong></dt>
+      <dd>Apple Intelligence language models exposed to apps through the
+        documented Foundation Models framework.</dd>
+      <dt><strong>Intelligence Platform</strong></dt>
+      <dd>The local store and daemons described by third-party research. It is
+        not established as a public Foundation Models query API.</dd>
+    </dl>
+
+    <h2>Read-only inspection sequence</h2>
+    <pre><code>cd /Users/abuxton/src/github/dojo
+./lessons/apple-intelligence-personal-knowledge-graph/bin/intelligence-platform inventory
+./lessons/apple-intelligence-personal-knowledge-graph/bin/intelligence-platform tables
+./lessons/apple-intelligence-personal-knowledge-graph/bin/intelligence-platform schema</code></pre>
+    <p>Only then write a narrow <code>SELECT … LIMIT 5</code> query. Keep every
+      result on the Mac; the tool opens SQLite with <code>-readonly</code>.</p>
+
+    <h2>AFM app boundary</h2>
+    <ol>
+      <li>Check <code>SystemLanguageModel.default.availability</code>.</li>
+      <li>Show a fallback when the model is unavailable or not ready.</li>
+      <li>Use an explicit app tool or trusted local data source when a model
+        needs data; do not assume hidden graph access.</li>
+    </ol>
+
+    <p class="source">Primary sources: <a href="https://developer.apple.com/documentation/FoundationModels">Foundation Models</a>
+      and <a href="https://developer.apple.com/documentation/FoundationModels/detecting-available-apple-foundation-models">model availability</a>.
+      Research context: <a href="https://8rank.ai/game/apple-intelligence-personal-knowledge-graph">8rank's analysis</a>.</p>
+  </main>
+</body>
+</html>
